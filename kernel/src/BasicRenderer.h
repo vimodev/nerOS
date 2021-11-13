@@ -13,6 +13,7 @@ enum COLOR {
 
 class BasicRenderer {
     public:
+        BasicRenderer(Framebuffer *framebuffer, PSF1_FONT *font);
         Point cursorPosition;
         Framebuffer *framebuffer;
         PSF1_FONT *font;

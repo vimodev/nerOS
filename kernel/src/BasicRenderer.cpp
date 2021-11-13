@@ -1,5 +1,12 @@
 #include "BasicRenderer.h"
 
+BasicRenderer::BasicRenderer(Framebuffer *Framebuffer, PSF1_FONT *Font) {
+    framebuffer = Framebuffer;
+    font = Font;
+    defaultColor = COLOR_WHITE;
+    cursorPosition = {0, 0};
+}
+
 // print the given string at the cursor position
 void BasicRenderer::print(unsigned int color, const char *str) {
 	char *chr = (char *) str;
