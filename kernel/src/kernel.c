@@ -20,9 +20,16 @@ typedef struct {
 	unsigned int PixelsPerScanline;
 } Framebuffer;
 
+typedef struct {
+	unsigned int x;
+	unsigned int y;
+} Point;
+
 Framebuffer *framebuffer;
 PSF1_FONT *font;
+Point cursorPosition;
 
+// put the given character with the given color at the given offset in the framebuffer
 void putChar(unsigned int colour, char chr, unsigned int xOff, unsigned int yOff) {
 	unsigned int *pxPtr = (unsigned int *) framebuffer->BaseAddress;
 	char * fontPtr = font->glyphBuffer + (chr * font->psf1_header->charsize);
@@ -36,25 +43,40 @@ void putChar(unsigned int colour, char chr, unsigned int xOff, unsigned int yOff
 	}
 }
 
+// print the given string at the cursor position
 void print(unsigned int colour, char* str) {
-	unsigned int x = 0;
 	char *chr = str;
-	putChar(0xffffffff, *chr, 0, 0);
 	while (*chr != 0) {
-		putChar(colour, *chr, x, 0);
-		x += 8;
+		if (*chr == '\n') {
+			cursorPosition.x = 0;
+			cursorPosition.y += 16;
+			chr++;
+			continue;
+		}
+		putChar(colour, *chr, cursorPosition.x, cursorPosition.y);
+		cursorPosition.x += 8;
+		if (cursorPosition.x + 8 > framebuffer->Width) {
+			cursorPosition.x = 0;
+			cursorPosition.y += 16;
+		}
 		chr++;
 	}
 }
 
 void _start(Framebuffer *fb, PSF1_FONT *ft) {
 
+	// Set global variables
 	framebuffer = fb;
 	font = ft;
 
-    print(0xffffffff, "Hello Kernel!");
-	// putChar(0xffffffff, 'G', 0, 0);
-	// putChar(0xffffffff, 'A', 8, 0);
+	// Initialize cursor
+	cursorPosition.x = 0;
+	cursorPosition.y = 0;
+
+	char KANKER[] = "KANKERRRRRR!\n";
+	for (int t = 0; t < 30; t++) {
+		print(0xffffffff, KANKER);
+	}
 
     return;
 }
