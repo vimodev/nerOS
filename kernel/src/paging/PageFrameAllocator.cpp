@@ -27,7 +27,7 @@ void PageFrameAllocator::ReadEFIMemoryMap(EFI_MEMORY_DESCRIPTOR* mMap, size_t mM
         }
     }
 
-    uint64_t memorySize = GetMemorySize(mMap, mMapEntries, mMapDescSize);
+    uint64_t memorySize = get_memory_size(mMap, mMapEntries, mMapDescSize);
     freeMemory = memorySize;
     uint64_t bitmapSize = memorySize / 4096 / 8 + 1;
 

@@ -18,7 +18,7 @@ void PrepareMemory(BootInfo* bootInfo){
 
     pageTableManager = PageTableManager(PML4);
 
-    for (uint64_t t = 0; t < GetMemorySize(bootInfo->memory_map, mMapEntries, bootInfo->memory_map_descriptor_size); t+= 0x1000){
+    for (uint64_t t = 0; t < get_memory_size(bootInfo->memory_map, mMapEntries, bootInfo->memory_map_descriptor_size); t+= 0x1000){
         pageTableManager.MapMemory((void*)t, (void*)t);
     }
 
