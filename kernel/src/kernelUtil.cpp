@@ -11,17 +11,17 @@ void prepare_memory(BootInfo* boot_info){
 
     // Initialize the page frame allocator
     GlobalAllocator = PageFrameAllocator();
-    GlobalAllocator.ReadEFIMemoryMap(boot_info->memory_map, boot_info->memory_map_size, boot_info->memory_map_descriptor_size);
+    GlobalAllocator.read_efi_memory_map(boot_info->memory_map, boot_info->memory_map_size, boot_info->memory_map_descriptor_size);
 
     // Calculate how many pages the kernel needs
     uint64_t kernel_size = (uint64_t)&_KernelEnd - (uint64_t)&_KernelStart;
     uint64_t kernel_pages = (uint64_t)kernel_size / 4096 + 1;
 
     // Lock that many pages starting from kernel start
-    GlobalAllocator.LockPages(&_KernelStart, kernel_pages);
+    GlobalAllocator.lock_pages(&_KernelStart, kernel_pages);
 
     // Initialize the PML4 memory table and manager
-    PageTable* PML4 = (PageTable*)GlobalAllocator.RequestPage();
+    PageTable* PML4 = (PageTable*)GlobalAllocator.request_page();
     memset(PML4, 0, 0x1000);
     kernel_util_page_table_manager = PageTableManager(PML4);
 
@@ -33,7 +33,7 @@ void prepare_memory(BootInfo* boot_info){
     // Also map the framebuffer
     uint64_t fb_base = (uint64_t)boot_info->framebuffer->base_address;
     uint64_t fb_size = (uint64_t)boot_info->framebuffer->buffer_size + 0x1000;
-    GlobalAllocator.LockPages((void*)fb_base, fb_size/ 0x1000 + 1);
+    GlobalAllocator.lock_pages((void*)fb_base, fb_size/ 0x1000 + 1);
     for (uint64_t t = fb_base; t < fb_base + fb_size; t += 4096){
         kernel_util_page_table_manager.map_memory((void*)t, (void*)t);
     }

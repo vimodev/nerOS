@@ -22,7 +22,7 @@ void PageTableManager::map_memory(void* virtual_memory, void* physical_memory) {
     // If it is not present yet, we create it
     if (!PDE.get_flag(PT_Flag::Present)){
         // Allocate it some memory
-        PDP = (PageTable*)GlobalAllocator.RequestPage();
+        PDP = (PageTable*)GlobalAllocator.request_page();
         memset(PDP, 0, 0x1000);
         // Set the address and the flags
         PDE.set_address((uint64_t)PDP >> 12);
@@ -38,7 +38,7 @@ void PageTableManager::map_memory(void* virtual_memory, void* physical_memory) {
     PageTable* PD;
     // If it does not exist, create it once more
     if (!PDE.get_flag(PT_Flag::Present)){
-        PD = (PageTable*)GlobalAllocator.RequestPage();
+        PD = (PageTable*)GlobalAllocator.request_page();
         memset(PD, 0, 0x1000);
         PDE.set_address((uint64_t)PD >> 12);
         PDE.set_flag(PT_Flag::Present, true);
@@ -53,7 +53,7 @@ void PageTableManager::map_memory(void* virtual_memory, void* physical_memory) {
     PageTable* PT;
     // Create it if not there yet, as before
     if (!PDE.get_flag(PT_Flag::Present)){
-        PT = (PageTable*)GlobalAllocator.RequestPage();
+        PT = (PageTable*)GlobalAllocator.request_page();
         memset(PT, 0, 0x1000);
         PDE.set_address((uint64_t)PT >> 12);
         PDE.set_flag(PT_Flag::Present, true);

@@ -8,13 +8,13 @@ extern "C" void _start(BootInfo* boot_info){
 
     renderer.print("Kernel Initialized Successfully\n");
     renderer.print("KB free: ");
-    renderer.print(to_string(GlobalAllocator.GetFreeRAM() / 1000));
+    renderer.print(to_string(GlobalAllocator.get_free_ram() / 1000));
     renderer.print("\n");
     renderer.print("KB used: ");
-    renderer.print(to_string(GlobalAllocator.GetUsedRAM() / 1000));
+    renderer.print(to_string(GlobalAllocator.get_used_ram() / 1000));
     renderer.print("\n");
     renderer.print("KB reserved: ");
-    renderer.print(to_string(GlobalAllocator.GetReservedRAM() / 1000));
+    renderer.print(to_string(GlobalAllocator.get_reserved_ram() / 1000));
     renderer.print("\n");
 
     page_table_manager->map_memory((void*)0x600000000, (void*)0x80000);
