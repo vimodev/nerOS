@@ -45,7 +45,7 @@ void prepare_memory(BootInfo* boot_info){
 }
 
 // Everything we need to do to get the kernel basic functionality
-KernelInfo InitializeKernel(BootInfo* boot_info){
+KernelInfo initialize_kernel(BootInfo* boot_info){
 
     // Prepare the memory map and manager
     prepare_memory(boot_info);

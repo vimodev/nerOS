@@ -2,7 +2,7 @@
 
 extern "C" void _start(BootInfo* boot_info){
 
-    KernelInfo kernel_info = InitializeKernel(boot_info);
+    KernelInfo kernel_info = initialize_kernel(boot_info);
     PageTableManager* page_table_manager = kernel_info.page_table_manager;
     BasicRenderer renderer = BasicRenderer(boot_info->framebuffer, boot_info->psf1_font); 
 
