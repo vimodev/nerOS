@@ -13,10 +13,10 @@
 
 struct BootInfo {
 	Framebuffer* framebuffer;
-	PSF1_FONT* psf1_Font;
-	EFI_MEMORY_DESCRIPTOR* mMap;
-	uint64_t mMapSize;
-	uint64_t mMapDescSize;
+	PSF1_FONT* psf1_font;
+	EFI_MEMORY_DESCRIPTOR* memory_map;
+	uint64_t memory_map_size;
+	uint64_t memory_map_descriptor_size;
 } ;
 
 extern uint64_t _KernelStart;

@@ -125,6 +125,7 @@ PSF1_FONT* load_psf1_font(EFI_FILE* directory, CHAR16* path, EFI_HANDLE image_ha
 	return finished_font;
 }
 
+// memcmp implementation
 int memcmp(const void* aptr, const void* bptr, size_t n){
 	const unsigned char* a = aptr, *b = bptr;
 	for (size_t i = 0; i < n; i++){
@@ -134,12 +135,13 @@ int memcmp(const void* aptr, const void* bptr, size_t n){
 	return 0;
 }
 
+// Struct to pass boot information to kernel conveniently
 typedef struct {
 	Framebuffer* framebuffer;
-	PSF1_FONT* psf1_Font;
-	EFI_MEMORY_DESCRIPTOR* mMap;
-	UINTN mMapSize;
-	UINTN mMapDescSize;
+	PSF1_FONT* psf1_font;
+	EFI_MEMORY_DESCRIPTOR* memory_map;
+	UINTN memory_map_size;
+	UINTN memory_map_descriptor_size;
 } BootInfo;
 
 EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
@@ -249,10 +251,10 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
 	BootInfo bootInfo;
 	bootInfo.framebuffer = newBuffer;
-	bootInfo.psf1_Font = newFont;
-	bootInfo.mMap = Map;
-	bootInfo.mMapSize = MapSize;
-	bootInfo.mMapDescSize = DescriptorSize;
+	bootInfo.psf1_font = newFont;
+	bootInfo.memory_map = Map;
+	bootInfo.memory_map_size = MapSize;
+	bootInfo.memory_map_descriptor_size = DescriptorSize;
 
 	SystemTable->BootServices->ExitBootServices(ImageHandle, MapKey);
 

@@ -3,10 +3,10 @@
 KernelInfo kernelInfo;
 PageTableManager pageTableManager = NULL;
 void PrepareMemory(BootInfo* bootInfo){
-    uint64_t mMapEntries = bootInfo->mMapSize / bootInfo->mMapDescSize;
+    uint64_t mMapEntries = bootInfo->memory_map_size / bootInfo->memory_map_descriptor_size;
 
     GlobalAllocator = PageFrameAllocator();
-    GlobalAllocator.ReadEFIMemoryMap(bootInfo->mMap, bootInfo->mMapSize, bootInfo->mMapDescSize);
+    GlobalAllocator.ReadEFIMemoryMap(bootInfo->memory_map, bootInfo->memory_map_size, bootInfo->memory_map_descriptor_size);
 
     uint64_t kernelSize = (uint64_t)&_KernelEnd - (uint64_t)&_KernelStart;
     uint64_t kernelPages = (uint64_t)kernelSize / 4096 + 1;
@@ -18,7 +18,7 @@ void PrepareMemory(BootInfo* bootInfo){
 
     pageTableManager = PageTableManager(PML4);
 
-    for (uint64_t t = 0; t < GetMemorySize(bootInfo->mMap, mMapEntries, bootInfo->mMapDescSize); t+= 0x1000){
+    for (uint64_t t = 0; t < GetMemorySize(bootInfo->memory_map, mMapEntries, bootInfo->memory_map_descriptor_size); t+= 0x1000){
         pageTableManager.MapMemory((void*)t, (void*)t);
     }
 
