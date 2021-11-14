@@ -1,24 +1,35 @@
 #include "Bitmap.h"
 
+// Get the i'th bit using the [] operator
 bool Bitmap::operator[](uint64_t index){
-    if (index > Size * 8) return false;
-    uint64_t byteIndex = index / 8;
-    uint8_t bitIndex = index % 8;
-    uint8_t bitIndexer = 0b10000000 >> bitIndex;
-    if ((Buffer[byteIndex] & bitIndexer) > 0){
+    // Out of bounds
+    if (index > size * 8) return false;
+    // Split byte and bit index
+    uint64_t byte_index = index / 8;
+    uint8_t bit_index = index % 8;
+    // Create a mask
+    uint8_t bit_indexer = 0b10000000 >> bit_index;
+    // Apply mask
+    if ((buffer[byte_index] & bit_indexer) > 0){
         return true;
     }
     return false;
 }
 
-bool Bitmap::Set(uint64_t index, bool value){
-    if (index > Size * 8) return false;
-    uint64_t byteIndex = index / 8;
-    uint8_t bitIndex = index % 8;
-    uint8_t bitIndexer = 0b10000000 >> bitIndex;
-    Buffer[byteIndex] &= ~bitIndexer;
+// Set the i'th bit to value
+bool Bitmap::set(uint64_t index, bool value){
+    // Out of bounds
+    if (index > size * 8) return false;
+    // Split byte and bit index
+    uint64_t byte_index = index / 8;
+    uint8_t bit_index = index % 8;
+    // Create mask
+    uint8_t bit_indexer = 0b10000000 >> bit_index;
+    // Set target bit to 0
+    buffer[byte_index] &= ~bit_indexer;
+    // And if value = true set it to 1 again
     if (value){
-        Buffer[byteIndex] |= bitIndexer;
+        buffer[byte_index] |= bit_indexer;
     }
     return true;
 }
