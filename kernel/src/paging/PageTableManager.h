@@ -3,7 +3,7 @@
 
 class PageTableManager {
     public:
-    PageTableManager(PageTable* PML4Address);
+    PageTableManager(PageTable* pml4_address);
     PageTable* PML4;
-    void MapMemory(void* virtualMemory, void* physicalMemory);
+    void map_memory(void* virtual_memory, void* physical_memory);
 };

@@ -17,7 +17,7 @@ extern "C" void _start(BootInfo* boot_info){
     renderer.print(to_string(GlobalAllocator.GetReservedRAM() / 1000));
     renderer.print("\n");
 
-    page_table_manager->MapMemory((void*)0x600000000, (void*)0x80000);
+    page_table_manager->map_memory((void*)0x600000000, (void*)0x80000);
 
     uint64_t* test = (uint64_t*)0x600000000;
     *test = 26;
