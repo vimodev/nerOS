@@ -29,9 +29,9 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@ echo !==== COMPILING $^
 	@ mkdir -p $(@D)
 	$(CC) $(CFLAGS) -c $^ -o $@
-
+	
 link:
-	@ echo !==== LINKING $^
+	@ echo !==== LINKING
 	$(LD) $(LDFLAGS) -o $(BUILDDIR)/kernel.elf $(OBJS)
 
 setup:

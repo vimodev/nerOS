@@ -1,46 +1,40 @@
 #include "BasicRenderer.h"
 
-BasicRenderer::BasicRenderer(Framebuffer *Framebuffer, PSF1_FONT *Font) {
-    framebuffer = Framebuffer;
-    font = Font;
-    defaultColor = COLOR_WHITE;
-    cursorPosition = {0, 0};
+BasicRenderer::BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* psf1_Font)
+{
+    TargetFramebuffer = targetFramebuffer;
+    PSF1_Font = psf1_Font;
+    Colour = 0xffffffff;
+    CursorPosition = {0, 0};
 }
 
-// print the given string at the cursor position
-void BasicRenderer::print(unsigned int color, const char *str) {
-	char *chr = (char *) str;
-	while (*chr != 0) {
-		if (*chr == '\n') {
-			cursorPosition.x = 0;
-			cursorPosition.y += 16;
-			chr++;
-			continue;
-		}
-		BasicRenderer::putChar(color, *chr, cursorPosition.x, cursorPosition.y);
-		cursorPosition.x += 8;
-		if (cursorPosition.x + 8 > framebuffer->Width) {
-			cursorPosition.x = 0;
-			cursorPosition.y += 16;
-		}
-		chr++;
-	}
+void BasicRenderer::Print(const char* str)
+{
+    
+    char* chr = (char*)str;
+    while(*chr != 0){
+        PutChar(*chr, CursorPosition.X, CursorPosition.Y);
+        CursorPosition.X+=8;
+        if(CursorPosition.X + 8 > TargetFramebuffer->Width)
+        {
+            CursorPosition.X = 0;
+            CursorPosition.Y += 16;
+        }
+        chr++;
+    }
 }
 
-void BasicRenderer::print(const char *str) {
-    print(defaultColor, str);
-}
+void BasicRenderer::PutChar(char chr, unsigned int xOff, unsigned int yOff)
+{
+    unsigned int* pixPtr = (unsigned int*)TargetFramebuffer->BaseAddress;
+    char* fontPtr = (char*)PSF1_Font->glyphBuffer + (chr * PSF1_Font->psf1_Header->charsize);
+    for (unsigned long y = yOff; y < yOff + 16; y++){
+        for (unsigned long x = xOff; x < xOff+8; x++){
+            if ((*fontPtr & (0b10000000 >> (x - xOff))) > 0){
+                    *(unsigned int*)(pixPtr + x + (y * TargetFramebuffer->PixelsPerScanLine)) = Colour;
+                }
 
-// put the given character with the given color at the given offset in the framebuffer
-void BasicRenderer::putChar(unsigned int color, char chr, unsigned int xOff, unsigned int yOff) {
-	unsigned int *pxPtr = (unsigned int *) framebuffer->BaseAddress;
-	char * fontPtr = (char *) font->glyphBuffer + (chr * font->psf1_header->charsize);
-	for (unsigned long y = yOff; y < yOff + 16; y++) {
-		for (unsigned long x = xOff; x < xOff + 8; x++) {
-			if ((*fontPtr & (0b10000000 >> (x - xOff))) > 0) {
-				*(unsigned int *)(pxPtr + x + (y * framebuffer->PixelsPerScanline)) = color;
-			}
-		}
-		fontPtr++;
-	}
+        }
+        fontPtr++;
+    }
 }

@@ -1,24 +1,15 @@
 #pragma once
-
 #include "math.h"
 #include "Framebuffer.h"
 #include "simpleFonts.h"
 
-enum COLOR {
-	COLOR_WHITE = 0x00ffffff,
-	COLOR_RED = 0x00ff0000,
-	COLOR_BLUE = 0x0000ff00,
-	COLOR_GREEN = 0x000000ff
-};
-
-class BasicRenderer {
+class BasicRenderer{
     public:
-        BasicRenderer(Framebuffer *framebuffer, PSF1_FONT *font);
-        Point cursorPosition;
-        Framebuffer *framebuffer;
-        PSF1_FONT *font;
-        COLOR defaultColor;
-        void print(unsigned int color, const char *str);
-        void print(const char *str);
-        void putChar(unsigned int color, char chr, unsigned int xOff, unsigned int yOff);
+    BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* psf1_Font);
+    Point CursorPosition;
+    Framebuffer* TargetFramebuffer;
+    PSF1_FONT* PSF1_Font;
+    unsigned int Colour;
+    void Print(const char* str);
+    void PutChar(char chr, unsigned int xOff, unsigned int yOff);
 };
