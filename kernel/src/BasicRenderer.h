@@ -3,13 +3,13 @@
 #include "Framebuffer.h"
 #include "simpleFonts.h"
 
-class BasicRenderer{
+class BasicRenderer {
     public:
-    BasicRenderer(Framebuffer* targetFramebuffer, PSF1_FONT* psf1_Font);
-    Point CursorPosition;
-    Framebuffer* TargetFramebuffer;
-    PSF1_FONT* PSF1_Font;
-    unsigned int Colour;
-    void Print(const char* str);
-    void PutChar(char chr, unsigned int xOff, unsigned int yOff);
+    BasicRenderer(Framebuffer* target_frame_buffer, PSF1_FONT* psf1_font);
+    Point cursor_position;
+    Framebuffer* target_frame_buffer;
+    PSF1_FONT* font;
+    unsigned int color;
+    void print(const char* str);
+    void put_char(char chr, unsigned int x_off, unsigned int y_off);
 };
