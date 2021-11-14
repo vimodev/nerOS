@@ -47,6 +47,12 @@ void prepare_memory(BootInfo* boot_info){
 // Everything we need to do to get the kernel basic functionality
 KernelInfo initialize_kernel(BootInfo* boot_info){
 
+    // Load the GDT
+    GDTDescriptor gdt_descriptor;
+    gdt_descriptor.size = sizeof(GDT) - 1;
+    gdt_descriptor.offset = (uint64_t)&DefaultGDT;
+    load_gdt(&gdt_descriptor);
+
     // Prepare the memory map and manager
     prepare_memory(boot_info);
 
