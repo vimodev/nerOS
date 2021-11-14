@@ -144,30 +144,36 @@ typedef struct {
 	UINTN memory_map_descriptor_size;
 } BootInfo;
 
-EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
-	InitializeLib(ImageHandle, SystemTable);
-	Print(L"String blah blah blah \n\r");
+// EFI main entry function
+EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
+	EFI_HANDLE image_handle = ImageHandle;
+	EFI_SYSTEM_TABLE *system_table = SystemTable;
 
-	EFI_FILE* Kernel = load_file(NULL, L"kernel.elf", ImageHandle, SystemTable);
-	if (Kernel == NULL){
+	// Allow us to use useful EFI stuff
+	InitializeLib(image_handle, system_table);
+
+	// Load the kernel file information
+	EFI_FILE* kernel = load_file(NULL, L"kernel.elf", image_handle, system_table);
+	if (kernel == NULL) {
 		Print(L"Could not load kernel \n\r");
-	}
-	else{
+	} else {
 		Print(L"Kernel Loaded Successfully \n\r");
 	}
 
+	// Load kernel
 	Elf64_Ehdr header;
 	{
 		UINTN FileInfoSize;
 		EFI_FILE_INFO* FileInfo;
-		Kernel->GetInfo(Kernel, &gEfiFileInfoGuid, &FileInfoSize, NULL);
+		kernel->GetInfo(kernel, &gEfiFileInfoGuid, &FileInfoSize, NULL);
 		SystemTable->BootServices->AllocatePool(EfiLoaderData, FileInfoSize, (void**)&FileInfo);
-		Kernel->GetInfo(Kernel, &gEfiFileInfoGuid, &FileInfoSize, (void**)&FileInfo);
+		kernel->GetInfo(kernel, &gEfiFileInfoGuid, &FileInfoSize, (void**)&FileInfo);
 
 		UINTN size = sizeof(header);
-		Kernel->Read(Kernel, &size, &header);
+		kernel->Read(kernel, &size, &header);
 	}
 
+	// Check for kernel .elf validity
 	if (
 		memcmp(&header.e_ident[EI_MAG0], ELFMAG, SELFMAG) != 0 ||
 		header.e_ident[EI_CLASS] != ELFCLASS64 ||
@@ -175,90 +181,98 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 		header.e_type != ET_EXEC ||
 		header.e_machine != EM_X86_64 ||
 		header.e_version != EV_CURRENT
-	)
-	{
+	) {
 		Print(L"kernel format is bad\r\n");
-	}
-	else
-	{
+		return EFI_LOAD_ERROR;
+	} else {
 		Print(L"kernel header successfully verified\r\n");
 	}
 
+	// Fetch kernel program headers
 	Elf64_Phdr* phdrs;
 	{
-		Kernel->SetPosition(Kernel, header.e_phoff);
+		kernel->SetPosition(kernel, header.e_phoff);
 		UINTN size = header.e_phnum * header.e_phentsize;
 		SystemTable->BootServices->AllocatePool(EfiLoaderData, size, (void**)&phdrs);
-		Kernel->Read(Kernel, &size, phdrs);
+		kernel->Read(kernel, &size, phdrs);
 	}
 
+	// Go through all the headers to find relevant data
 	for (
 		Elf64_Phdr* phdr = phdrs;
 		(char*)phdr < (char*)phdrs + header.e_phnum * header.e_phentsize;
 		phdr = (Elf64_Phdr*)((char*)phdr + header.e_phentsize)
-	)
-	{
+	) {
 		switch (phdr->p_type){
+			// For a header of type PT_LOAD, we wish to load it
 			case PT_LOAD:
 			{
+				// Reserve some memory for the data
 				int pages = (phdr->p_memsz + 0x1000 - 1) / 0x1000;
 				Elf64_Addr segment = phdr->p_paddr;
 				SystemTable->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, &segment);
 
-				Kernel->SetPosition(Kernel, phdr->p_offset);
+				// Load the kernel program from the position indicated by the header
+				kernel->SetPosition(kernel, phdr->p_offset);
 				UINTN size = phdr->p_filesz;
-				Kernel->Read(Kernel, &size, (void*)segment);
+				kernel->Read(kernel, &size, (void*)segment);
 				break;
 			}
 		}
 	}
 
+	// We have successfully loaded the kernel
 	Print(L"Kernel Loaded\n\r");
-	
 
-	PSF1_FONT* newFont = load_psf1_font(NULL, L"zap-light16.psf", ImageHandle, SystemTable);
-	if (newFont == NULL){
+	// Load a font for text rendering
+	PSF1_FONT* font = load_psf1_font(NULL, L"zap-light16.psf", ImageHandle, SystemTable);
+	if (font == NULL) {
 		Print(L"Font is not valid or is not found\n\r");
-	}
-	else
-	{
-		Print(L"Font found. char size = %d\n\r", newFont->psf1_header->charsize);
+		return EFI_NOT_FOUND;
+	} else {
+		Print(L"Font found. char size = %d\n\r", font->psf1_header->charsize);
 	}
 	
-
-	Framebuffer* newBuffer = initialize_gop();
+	// Initialize the framebuffer for rendering
+	Framebuffer* framebuffer = initialize_gop();
 
 	Print(L"Base: 0x%x\n\rSize: 0x%x\n\rWidth: %d\n\rHeight: %d\n\rPixelsPerScanline: %d\n\r", 
-	newBuffer->base_address, 
-	newBuffer->buffer_size, 
-	newBuffer->width, 
-	newBuffer->height, 
-	newBuffer->pixels_per_scanline);
+	framebuffer->base_address, 
+	framebuffer->buffer_size, 
+	framebuffer->width, 
+	framebuffer->height, 
+	framebuffer->pixels_per_scanline);
 
-	EFI_MEMORY_DESCRIPTOR* Map = NULL;
-	UINTN MapSize, MapKey;
-	UINTN DescriptorSize;
-	UINT32 DescriptorVersion;
+	// Load the EFI memory map for passing to kernel
+	EFI_MEMORY_DESCRIPTOR* map = NULL;
+	UINTN map_size, map_key;
+	UINTN descriptor_size;
+	UINT32 descriptor_version;
 	{
 		
-		SystemTable->BootServices->GetMemoryMap(&MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, MapSize, (void**)&Map);
-		SystemTable->BootServices->GetMemoryMap(&MapSize, Map, &MapKey, &DescriptorSize, &DescriptorVersion);
+		SystemTable->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
+		SystemTable->BootServices->AllocatePool(EfiLoaderData, map_size, (void**)&map);
+		SystemTable->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
 
 	}
 
-	void (*KernelStart)(BootInfo*) = ((__attribute__((sysv_abi)) void (*)(BootInfo*) ) header.e_entry);
+	// Locate kernel entry function in the kernel data
+	void (*kernel_start)(BootInfo*) = ((__attribute__((sysv_abi)) void (*)(BootInfo*) ) header.e_entry);
 
-	BootInfo bootInfo;
-	bootInfo.framebuffer = newBuffer;
-	bootInfo.psf1_font = newFont;
-	bootInfo.memory_map = Map;
-	bootInfo.memory_map_size = MapSize;
-	bootInfo.memory_map_descriptor_size = DescriptorSize;
+	// Form the boot info structure
+	BootInfo boot_info;
+	boot_info.framebuffer = framebuffer;
+	boot_info.psf1_font = font;
+	boot_info.memory_map = map;
+	boot_info.memory_map_size = map_size;
+	boot_info.memory_map_descriptor_size = descriptor_size;
 
-	SystemTable->BootServices->ExitBootServices(ImageHandle, MapKey);
+	// Exit boot services
+	SystemTable->BootServices->ExitBootServices(ImageHandle, map_key);
 
-	KernelStart(&bootInfo);
+	// Run the kernel entry
+	kernel_start(&boot_info);
 
+	// Should never be reached
 	return EFI_SUCCESS; // Exit the UEFI application
 }
