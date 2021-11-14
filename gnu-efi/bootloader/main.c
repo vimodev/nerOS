@@ -4,31 +4,34 @@
 
 typedef unsigned long long size_t;
 
+// Structure to hold framebuffer data
 typedef struct {
-	void* base_address;
-	size_t buffer_size;
-	unsigned int width;
+	void* base_address; // Frame buffer address
+	size_t buffer_size; // Size
+	unsigned int width; 
 	unsigned int height;
-	unsigned int pixels_per_scanline;
+	unsigned int pixels_per_scanline; // width is more than screenwidth
 } Framebuffer;
 
+// PSF1 font format signature bytes
 #define PSF1_MAGIC0 0x36
 #define PSF1_MAGIC1 0x04
 
+// PSF1 font file header
 typedef struct {
-	unsigned char magic[2];
+	unsigned char magic[2]; // Magic signature bytes
 	unsigned char mode;
 	unsigned char charsize;
 } PSF1_HEADER;
-
+// PSF1 font
 typedef struct {
-	PSF1_HEADER* psf1_Header;
-	void* glyphBuffer;
+	PSF1_HEADER* psf1_header;
+	void* glyph_buffer; // Buffer with symbols
 } PSF1_FONT;
 
-
-
+// Globally addressable framebuffer object
 Framebuffer framebuffer;
+
 Framebuffer* InitializeGOP(){
 	EFI_GUID gopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 	EFI_GRAPHICS_OUTPUT_PROTOCOL* gop;
@@ -94,17 +97,17 @@ PSF1_FONT* LoadPSF1Font(EFI_FILE* Directory, CHAR16* Path, EFI_HANDLE ImageHandl
 		glyphBufferSize = fontHeader->charsize * 512;
 	}
 
-	void* glyphBuffer;
+	void* glyph_buffer;
 	{
 		font->SetPosition(font, sizeof(PSF1_HEADER));
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, glyphBufferSize, (void**)&glyphBuffer);
-		font->Read(font, &glyphBufferSize, glyphBuffer);
+		SystemTable->BootServices->AllocatePool(EfiLoaderData, glyphBufferSize, (void**)&glyph_buffer);
+		font->Read(font, &glyphBufferSize, glyph_buffer);
 	}
 
 	PSF1_FONT* finishedFont;
 	SystemTable->BootServices->AllocatePool(EfiLoaderData, sizeof(PSF1_FONT), (void**)&finishedFont);
-	finishedFont->psf1_Header = fontHeader;
-	finishedFont->glyphBuffer = glyphBuffer;
+	finishedFont->psf1_header = fontHeader;
+	finishedFont->glyph_buffer = glyph_buffer;
 	return finishedFont;
 
 }
@@ -204,7 +207,7 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	}
 	else
 	{
-		Print(L"Font found. char size = %d\n\r", newFont->psf1_Header->charsize);
+		Print(L"Font found. char size = %d\n\r", newFont->psf1_header->charsize);
 	}
 	
 

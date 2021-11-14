@@ -27,7 +27,7 @@ void BasicRenderer::Print(const char* str)
 void BasicRenderer::PutChar(char chr, unsigned int xOff, unsigned int yOff)
 {
     unsigned int* pixPtr = (unsigned int*)TargetFramebuffer->base_address;
-    char* fontPtr = (char*)PSF1_Font->glyphBuffer + (chr * PSF1_Font->psf1_Header->charsize);
+    char* fontPtr = (char*)PSF1_Font->glyph_buffer + (chr * PSF1_Font->psf1_header->charsize);
     for (unsigned long y = yOff; y < yOff + 16; y++){
         for (unsigned long x = xOff; x < xOff+8; x++){
             if ((*fontPtr & (0b10000000 >> (x - xOff))) > 0){
