@@ -32,21 +32,23 @@ typedef struct {
 // Globally addressable framebuffer object
 Framebuffer framebuffer;
 
-Framebuffer* InitializeGOP(){
-	EFI_GUID gopGuid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
+// Initialize GOP for rendering to the buffer
+Framebuffer* initialize_gop() {
+	// Fetch GOP info
+	EFI_GUID gop_guid = EFI_GRAPHICS_OUTPUT_PROTOCOL_GUID;
 	EFI_GRAPHICS_OUTPUT_PROTOCOL* gop;
 	EFI_STATUS status;
 
-	status = uefi_call_wrapper(BS->LocateProtocol, 3, &gopGuid, NULL, (void**)&gop);
+	// Attempt to call the EUFI GOP wrapper
+	status = uefi_call_wrapper(BS->LocateProtocol, 3, &gop_guid, NULL, (void**)&gop);
 	if(EFI_ERROR(status)){
 		Print(L"Unable to locate GOP\n\r");
 		return NULL;
-	}
-	else
-	{
+	} else {
 		Print(L"GOP located\n\r");
 	}
 
+	// Form the frame buffer struct
 	framebuffer.base_address = (void*)gop->Mode->FrameBufferBase;
 	framebuffer.buffer_size = gop->Mode->FrameBufferSize;
 	framebuffer.width = gop->Mode->Info->HorizontalResolution;
@@ -54,7 +56,6 @@ Framebuffer* InitializeGOP(){
 	framebuffer.pixels_per_scanline = gop->Mode->Info->PixelsPerScanLine;
 
 	return &framebuffer;
-	
 }
 
 EFI_FILE* LoadFile(EFI_FILE* Directory, CHAR16* Path, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable){
@@ -211,7 +212,7 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	}
 	
 
-	Framebuffer* newBuffer = InitializeGOP();
+	Framebuffer* newBuffer = initialize_gop();
 
 	Print(L"Base: 0x%x\n\rSize: 0x%x\n\rWidth: %d\n\rHeight: %d\n\rPixelsPerScanline: %d\n\r", 
 	newBuffer->base_address, 
