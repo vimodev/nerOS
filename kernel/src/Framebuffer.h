@@ -2,9 +2,9 @@
 #include <stddef.h>
 
 struct Framebuffer{
-	void* BaseAddress;
-	size_t BufferSize;
-	unsigned int Width;
-	unsigned int Height;
-	unsigned int PixelsPerScanLine;
+	void* base_address;
+	size_t buffer_size;
+	unsigned int width;
+	unsigned int height;
+	unsigned int pixels_per_scanline;
 };

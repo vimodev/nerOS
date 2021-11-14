@@ -15,7 +15,7 @@ void BasicRenderer::Print(const char* str)
     while(*chr != 0){
         PutChar(*chr, CursorPosition.X, CursorPosition.Y);
         CursorPosition.X+=8;
-        if(CursorPosition.X + 8 > TargetFramebuffer->Width)
+        if(CursorPosition.X + 8 > TargetFramebuffer->width)
         {
             CursorPosition.X = 0;
             CursorPosition.Y += 16;
@@ -26,12 +26,12 @@ void BasicRenderer::Print(const char* str)
 
 void BasicRenderer::PutChar(char chr, unsigned int xOff, unsigned int yOff)
 {
-    unsigned int* pixPtr = (unsigned int*)TargetFramebuffer->BaseAddress;
+    unsigned int* pixPtr = (unsigned int*)TargetFramebuffer->base_address;
     char* fontPtr = (char*)PSF1_Font->glyphBuffer + (chr * PSF1_Font->psf1_Header->charsize);
     for (unsigned long y = yOff; y < yOff + 16; y++){
         for (unsigned long x = xOff; x < xOff+8; x++){
             if ((*fontPtr & (0b10000000 >> (x - xOff))) > 0){
-                    *(unsigned int*)(pixPtr + x + (y * TargetFramebuffer->PixelsPerScanLine)) = Colour;
+                    *(unsigned int*)(pixPtr + x + (y * TargetFramebuffer->pixels_per_scanline)) = Colour;
                 }
 
         }

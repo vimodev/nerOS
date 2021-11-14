@@ -5,11 +5,11 @@
 typedef unsigned long long size_t;
 
 typedef struct {
-	void* BaseAddress;
-	size_t BufferSize;
-	unsigned int Width;
-	unsigned int Height;
-	unsigned int PixelsPerScanLine;
+	void* base_address;
+	size_t buffer_size;
+	unsigned int width;
+	unsigned int height;
+	unsigned int pixels_per_scanline;
 } Framebuffer;
 
 #define PSF1_MAGIC0 0x36
@@ -44,11 +44,11 @@ Framebuffer* InitializeGOP(){
 		Print(L"GOP located\n\r");
 	}
 
-	framebuffer.BaseAddress = (void*)gop->Mode->FrameBufferBase;
-	framebuffer.BufferSize = gop->Mode->FrameBufferSize;
-	framebuffer.Width = gop->Mode->Info->HorizontalResolution;
-	framebuffer.Height = gop->Mode->Info->VerticalResolution;
-	framebuffer.PixelsPerScanLine = gop->Mode->Info->PixelsPerScanLine;
+	framebuffer.base_address = (void*)gop->Mode->FrameBufferBase;
+	framebuffer.buffer_size = gop->Mode->FrameBufferSize;
+	framebuffer.width = gop->Mode->Info->HorizontalResolution;
+	framebuffer.height = gop->Mode->Info->VerticalResolution;
+	framebuffer.pixels_per_scanline = gop->Mode->Info->PixelsPerScanLine;
 
 	return &framebuffer;
 	
@@ -211,11 +211,11 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	Framebuffer* newBuffer = InitializeGOP();
 
 	Print(L"Base: 0x%x\n\rSize: 0x%x\n\rWidth: %d\n\rHeight: %d\n\rPixelsPerScanline: %d\n\r", 
-	newBuffer->BaseAddress, 
-	newBuffer->BufferSize, 
-	newBuffer->Width, 
-	newBuffer->Height, 
-	newBuffer->PixelsPerScanLine);
+	newBuffer->base_address, 
+	newBuffer->buffer_size, 
+	newBuffer->width, 
+	newBuffer->height, 
+	newBuffer->pixels_per_scanline);
 
 	EFI_MEMORY_DESCRIPTOR* Map = NULL;
 	UINTN MapSize, MapKey;

@@ -22,8 +22,8 @@ void PrepareMemory(BootInfo* bootInfo){
         pageTableManager.MapMemory((void*)t, (void*)t);
     }
 
-    uint64_t fbBase = (uint64_t)bootInfo->framebuffer->BaseAddress;
-    uint64_t fbSize = (uint64_t)bootInfo->framebuffer->BufferSize + 0x1000;
+    uint64_t fbBase = (uint64_t)bootInfo->framebuffer->base_address;
+    uint64_t fbSize = (uint64_t)bootInfo->framebuffer->buffer_size + 0x1000;
     GlobalAllocator.LockPages((void*)fbBase, fbSize/ 0x1000 + 1);
     for (uint64_t t = fbBase; t < fbBase + fbSize; t += 4096){
         pageTableManager.MapMemory((void*)t, (void*)t);
@@ -39,7 +39,7 @@ KernelInfo InitializeKernel(BootInfo* bootInfo){
 
     PrepareMemory(bootInfo);
 
-    memset(bootInfo->framebuffer->BaseAddress, 0, bootInfo->framebuffer->BufferSize);
+    memset(bootInfo->framebuffer->base_address, 0, bootInfo->framebuffer->buffer_size);
 
     return kernelInfo;
 }
