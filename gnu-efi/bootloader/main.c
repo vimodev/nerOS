@@ -58,30 +58,35 @@ Framebuffer* initialize_gop() {
 	return &framebuffer;
 }
 
-EFI_FILE* LoadFile(EFI_FILE* Directory, CHAR16* Path, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable){
-	EFI_FILE* LoadedFile;
+// Load a file from the image
+EFI_FILE* load_file(EFI_FILE* directory, CHAR16* path, EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
+	EFI_FILE* loaded_file;
 
-	EFI_LOADED_IMAGE_PROTOCOL* LoadedImage;
-	SystemTable->BootServices->HandleProtocol(ImageHandle, &gEfiLoadedImageProtocolGuid, (void**)&LoadedImage);
+	// Fetch the loaded image
+	EFI_LOADED_IMAGE_PROTOCOL* loaded_image;
+	system_table->BootServices->HandleProtocol(image_handle, &gEfiLoadedImageProtocolGuid, (void**)&loaded_image);
 
-	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* FileSystem;
-	SystemTable->BootServices->HandleProtocol(LoadedImage->DeviceHandle, &gEfiSimpleFileSystemProtocolGuid, (void**)&FileSystem);
+	// Fetch the file system from the image
+	EFI_SIMPLE_FILE_SYSTEM_PROTOCOL* file_system;
+	system_table->BootServices->HandleProtocol(loaded_image->DeviceHandle, &gEfiSimpleFileSystemProtocolGuid, (void**)&file_system);
 
-	if (Directory == NULL){
-		FileSystem->OpenVolume(FileSystem, &Directory);
+	// If directory is null open the root dir
+	if (directory == NULL) {
+		file_system->OpenVolume(file_system, &directory);
 	}
 
-	EFI_STATUS s = Directory->Open(Directory, &LoadedFile, Path, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY);
-	if (s != EFI_SUCCESS){
+	// Attempt to open the path
+	EFI_STATUS s = directory->Open(directory, &loaded_file, path, EFI_FILE_MODE_READ, EFI_FILE_READ_ONLY);
+	if (s != EFI_SUCCESS) {
 		return NULL;
 	}
-	return LoadedFile;
 
+	return loaded_file;
 }
 
 PSF1_FONT* LoadPSF1Font(EFI_FILE* Directory, CHAR16* Path, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
 {
-	EFI_FILE* font = LoadFile(Directory, Path, ImageHandle, SystemTable);
+	EFI_FILE* font = load_file(Directory, Path, ImageHandle, SystemTable);
 	if (font == NULL) return NULL;
 
 	PSF1_HEADER* fontHeader;
@@ -134,7 +139,7 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	InitializeLib(ImageHandle, SystemTable);
 	Print(L"String blah blah blah \n\r");
 
-	EFI_FILE* Kernel = LoadFile(NULL, L"kernel.elf", ImageHandle, SystemTable);
+	EFI_FILE* Kernel = load_file(NULL, L"kernel.elf", ImageHandle, SystemTable);
 	if (Kernel == NULL){
 		Print(L"Could not load kernel \n\r");
 	}
