@@ -1,24 +1,28 @@
 #include "paging.h"
 
-void PageDirectoryEntry::SetFlag(PT_Flag flag, bool enabled){
-    uint64_t bitSelector = (uint64_t)1 << flag;
-    Value &= ~bitSelector;
+// Set the given flag to enabled
+void PageDirectoryEntry::set_flag(PT_Flag flag, bool enabled){
+    uint64_t bit_selector = (uint64_t)1 << flag;
+    value &= ~bit_selector;
     if (enabled){
-        Value |= bitSelector;
+        value |= bit_selector;
     }
 }
 
-bool PageDirectoryEntry::GetFlag(PT_Flag flag){
-    uint64_t bitSelector = (uint64_t)1 << flag;
-    return Value & bitSelector > 0 ? true : false;
+// Get the value of the given flag
+bool PageDirectoryEntry::get_flag(PT_Flag flag){
+    uint64_t bit_selector = (uint64_t)1 << flag;
+    return value & bit_selector > 0 ? true : false;
 }
 
-uint64_t PageDirectoryEntry::GetAddress(){
-    return (Value & 0x000ffffffffff000) >> 12;
+// Get the address of the PDE
+uint64_t PageDirectoryEntry::get_address(){
+    return (value & 0x000ffffffffff000) >> 12;
 }
 
-void PageDirectoryEntry::SetAddress(uint64_t address){
+// Set the address to the given one
+void PageDirectoryEntry::set_address(uint64_t address){
     address &= 0x000000ffffffffff;
-    Value &= 0xfff0000000000fff;
-    Value |= (address << 12);
+    value &= 0xfff0000000000fff;
+    value |= (address << 12);
 }
