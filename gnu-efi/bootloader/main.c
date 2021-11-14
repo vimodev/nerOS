@@ -84,38 +84,45 @@ EFI_FILE* load_file(EFI_FILE* directory, CHAR16* path, EFI_HANDLE image_handle, 
 	return loaded_file;
 }
 
-PSF1_FONT* LoadPSF1Font(EFI_FILE* Directory, CHAR16* Path, EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE* SystemTable)
-{
-	EFI_FILE* font = load_file(Directory, Path, ImageHandle, SystemTable);
+// Load a PSF1 font file
+PSF1_FONT* load_psf1_font(EFI_FILE* directory, CHAR16* path, EFI_HANDLE image_handle, EFI_SYSTEM_TABLE* system_table) {
+
+	// Load the font file
+	EFI_FILE* font = load_file(directory, path, image_handle, system_table);
 	if (font == NULL) return NULL;
 
-	PSF1_HEADER* fontHeader;
-	SystemTable->BootServices->AllocatePool(EfiLoaderData, sizeof(PSF1_HEADER), (void**)&fontHeader);
+	// Fetch header data
+	PSF1_HEADER* font_header;
+	system_table->BootServices->AllocatePool(EfiLoaderData, sizeof(PSF1_HEADER), (void**)&font_header);
 	UINTN size = sizeof(PSF1_HEADER);
-	font->Read(font, &size, fontHeader);
+	font->Read(font, &size, font_header);
 
-	if (fontHeader->magic[0] != PSF1_MAGIC0 || fontHeader->magic[1] != PSF1_MAGIC1){
+	// Check for the PSF1 signature bytes
+	if (font_header->magic[0] != PSF1_MAGIC0 || font_header->magic[1] != PSF1_MAGIC1){
 		return NULL;
 	}
 
-	UINTN glyphBufferSize = fontHeader->charsize * 256;
-	if (fontHeader->mode == 1) { //512 glyph mode
-		glyphBufferSize = fontHeader->charsize * 512;
+	// Fetch font file data
+	UINTN glyph_buffer_size = font_header->charsize * 256;
+	if (font_header->mode == 1) { //512 glyph mode
+		glyph_buffer_size = font_header->charsize * 512;
 	}
 
+	// Fetch font file contents
 	void* glyph_buffer;
 	{
 		font->SetPosition(font, sizeof(PSF1_HEADER));
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, glyphBufferSize, (void**)&glyph_buffer);
-		font->Read(font, &glyphBufferSize, glyph_buffer);
+		system_table->BootServices->AllocatePool(EfiLoaderData, glyph_buffer_size, (void**)&glyph_buffer);
+		font->Read(font, &glyph_buffer_size, glyph_buffer);
 	}
 
-	PSF1_FONT* finishedFont;
-	SystemTable->BootServices->AllocatePool(EfiLoaderData, sizeof(PSF1_FONT), (void**)&finishedFont);
-	finishedFont->psf1_header = fontHeader;
-	finishedFont->glyph_buffer = glyph_buffer;
-	return finishedFont;
+	// Form final font struct
+	PSF1_FONT* finished_font;
+	system_table->BootServices->AllocatePool(EfiLoaderData, sizeof(PSF1_FONT), (void**)&finished_font);
+	finished_font->psf1_header = font_header;
+	finished_font->glyph_buffer = glyph_buffer;
 
+	return finished_font;
 }
 
 int memcmp(const void* aptr, const void* bptr, size_t n){
@@ -207,7 +214,7 @@ EFI_STATUS efi_main (EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	Print(L"Kernel Loaded\n\r");
 	
 
-	PSF1_FONT* newFont = LoadPSF1Font(NULL, L"zap-light16.psf", ImageHandle, SystemTable);
+	PSF1_FONT* newFont = load_psf1_font(NULL, L"zap-light16.psf", ImageHandle, SystemTable);
 	if (newFont == NULL){
 		Print(L"Font is not valid or is not found\n\r");
 	}
