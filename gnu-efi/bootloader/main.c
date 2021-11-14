@@ -166,7 +166,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 		UINTN FileInfoSize;
 		EFI_FILE_INFO* FileInfo;
 		kernel->GetInfo(kernel, &gEfiFileInfoGuid, &FileInfoSize, NULL);
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, FileInfoSize, (void**)&FileInfo);
+		system_table->BootServices->AllocatePool(EfiLoaderData, FileInfoSize, (void**)&FileInfo);
 		kernel->GetInfo(kernel, &gEfiFileInfoGuid, &FileInfoSize, (void**)&FileInfo);
 
 		UINTN size = sizeof(header);
@@ -193,7 +193,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	{
 		kernel->SetPosition(kernel, header.e_phoff);
 		UINTN size = header.e_phnum * header.e_phentsize;
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, size, (void**)&phdrs);
+		system_table->BootServices->AllocatePool(EfiLoaderData, size, (void**)&phdrs);
 		kernel->Read(kernel, &size, phdrs);
 	}
 
@@ -210,7 +210,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 				// Reserve some memory for the data
 				int pages = (phdr->p_memsz + 0x1000 - 1) / 0x1000;
 				Elf64_Addr segment = phdr->p_paddr;
-				SystemTable->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, &segment);
+				system_table->BootServices->AllocatePages(AllocateAddress, EfiLoaderData, pages, &segment);
 
 				// Load the kernel program from the position indicated by the header
 				kernel->SetPosition(kernel, phdr->p_offset);
@@ -225,7 +225,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	Print(L"Kernel Loaded\n\r");
 
 	// Load a font for text rendering
-	PSF1_FONT* font = load_psf1_font(NULL, L"zap-light16.psf", ImageHandle, SystemTable);
+	PSF1_FONT* font = load_psf1_font(NULL, L"zap-light16.psf", image_handle, system_table);
 	if (font == NULL) {
 		Print(L"Font is not valid or is not found\n\r");
 		return EFI_NOT_FOUND;
@@ -250,9 +250,9 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	UINT32 descriptor_version;
 	{
 		
-		SystemTable->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
-		SystemTable->BootServices->AllocatePool(EfiLoaderData, map_size, (void**)&map);
-		SystemTable->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
+		system_table->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
+		system_table->BootServices->AllocatePool(EfiLoaderData, map_size, (void**)&map);
+		system_table->BootServices->GetMemoryMap(&map_size, map, &map_key, &descriptor_size, &descriptor_version);
 
 	}
 
@@ -268,7 +268,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	boot_info.memory_map_descriptor_size = descriptor_size;
 
 	// Exit boot services
-	SystemTable->BootServices->ExitBootServices(ImageHandle, map_key);
+	system_table->BootServices->ExitBootServices(image_handle, map_key);
 
 	// Run the kernel entry
 	kernel_start(&boot_info);

@@ -13,6 +13,12 @@ void BasicRenderer::Print(const char* str)
     
     char* chr = (char*)str;
     while(*chr != 0){
+        if (*chr == '\n') {
+            CursorPosition.X = 0;
+            CursorPosition.Y += 16;
+            chr++;
+            continue;
+        }
         PutChar(*chr, CursorPosition.X, CursorPosition.Y);
         CursorPosition.X+=8;
         if(CursorPosition.X + 8 > TargetFramebuffer->width)

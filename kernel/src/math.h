@@ -1,6 +1,6 @@
 #pragma once
 
-struct Point{
+struct Point {
     unsigned int X;
     unsigned int Y;
 };
