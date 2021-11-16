@@ -46,6 +46,14 @@ void prepare_memory(BootInfo* boot_info){
     kernel_util_kernel_info.page_table_manager = &kernel_util_page_table_manager;
 }
 
+// Set an IDT gate (binding interrupt handlers in the IDTR)
+void set_idt_gate(void *handler, uint8_t entry_offset, uint8_t type_attribute, uint8_t selector) {
+    IDTDescriptorEntry *interrupt = (IDTDescriptorEntry *)(idtr.offset + entry_offset * sizeof(IDTDescriptorEntry));
+    interrupt->set_offset((uint64_t) handler);
+    interrupt->type_attr = type_attribute;
+    interrupt->selector = selector;
+}
+
 // Prepare the system's interrupts
 void prepare_interrupts() {
     // Create the IDTR
@@ -53,29 +61,14 @@ void prepare_interrupts() {
     idtr.offset = (uint64_t) GlobalAllocator.request_page();
 
     // Page fault handler
-    IDTDescriptorEntry *interrupt_page_fault = (IDTDescriptorEntry *)(idtr.offset + 0xe * sizeof(IDTDescriptorEntry));
-    interrupt_page_fault->set_offset((uint64_t) page_fault_handler);
-    interrupt_page_fault->type_attr = IDT_TA_InterruptGate;
-    interrupt_page_fault->selector = 0x08;
-
+    set_idt_gate((void *) page_fault_handler, 0xe, IDT_TA_InterruptGate, 0x08);
     // Double fault handler (two unhandled faults in a row)
-    IDTDescriptorEntry *interrupt_double_fault = (IDTDescriptorEntry *)(idtr.offset + 0x8 * sizeof(IDTDescriptorEntry));
-    interrupt_double_fault->set_offset((uint64_t) double_fault_handler);
-    interrupt_double_fault->type_attr = IDT_TA_InterruptGate;
-    interrupt_double_fault->selector = 0x08;
-
+    set_idt_gate((void *) double_fault_handler, 0x8, IDT_TA_InterruptGate, 0x08);
     // General protection fault handler (all sorts of reasons, usually wrong execution permission)
-    IDTDescriptorEntry *interrupt_general_protection_fault = (IDTDescriptorEntry *)(idtr.offset + 0xd * sizeof(IDTDescriptorEntry));
-    interrupt_general_protection_fault->set_offset((uint64_t) general_protection_fault_handler);
-    interrupt_general_protection_fault->type_attr = IDT_TA_InterruptGate;
-    interrupt_general_protection_fault->selector = 0x08;
-
+    set_idt_gate((void *) general_protection_fault_handler, 0xd, IDT_TA_InterruptGate, 0x08);
     // Keyboard interrupt
     // PIC was remapped to 0x20 and keyboard was the second interrupt hence 0x21
-    IDTDescriptorEntry *interrupt_keyboard = (IDTDescriptorEntry *)(idtr.offset + 0x21 * sizeof(IDTDescriptorEntry));
-    interrupt_keyboard->set_offset((uint64_t) keyboard_interrupt_handler);
-    interrupt_keyboard->type_attr = IDT_TA_InterruptGate;
-    interrupt_keyboard->selector = 0x08;
+    set_idt_gate((void *) keyboard_interrupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
 
     asm ("lidt %0" : : "m" (idtr));
 
