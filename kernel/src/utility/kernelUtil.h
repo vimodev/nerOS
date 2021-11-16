@@ -11,7 +11,7 @@
 #include "../paging/paging.h"
 #include "../paging/PageTableManager.h"
 #include "../gdt/gdt.h"
-#include "../io.h"
+#include "../io/io.h"
 #include "../interrupts/IDT.h"
 #include "../interrupts/interrupts.h"
 

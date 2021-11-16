@@ -2,7 +2,7 @@
 
 #include "../graphics/BasicRenderer.h"
 #include "../panic.h"
-#include "../io.h"
+#include "../io/io.h"
 #include "../userinput/keyboard.h"
 
 #define PIC1_COMMAND 0x20
