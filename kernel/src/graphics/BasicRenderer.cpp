@@ -42,11 +42,16 @@ void BasicRenderer::clear_char() {
 
 // Clear the previous cursor position and move there
 void BasicRenderer::clear_char(uint32_t color) {
+    // Ignore if we are at top left already
+    if (cursor_position.X == 0 && cursor_position.Y == 0) return;
     // Move cursor back
-    if (cursor_position.X == 0) {
-        cursor_position.X == target_frame_buffer->width;
+    cursor_position.X -= 8;
+    if (cursor_position.X < 0) {
+        cursor_position.X += target_frame_buffer->width;
         cursor_position.Y -= 16;
-        if (cursor_position.Y < 0) cursor_position.Y = 0;
+        if (cursor_position.Y < 0) {
+            cursor_position.Y = 0;
+        }
     }
     // Completely clear that cell
     unsigned int x_off = cursor_position.X;
@@ -54,16 +59,9 @@ void BasicRenderer::clear_char(uint32_t color) {
     unsigned int* pixel_ptr = (unsigned int*)target_frame_buffer->base_address;
     // Write the character info to the pixel_ptr
     for (unsigned long y = y_off; y < y_off + 16; y++) {
-        for (unsigned long x = x_off - 8; x < x_off; x++) {
+        for (unsigned long x = x_off; x < x_off + 8; x++) {
             *(unsigned int*)(pixel_ptr + x + (y * target_frame_buffer->pixels_per_scanline)) = color;
         }
-    }
-    cursor_position.X -= 8;
-    // Handle underflow
-    if (cursor_position.X < 0) {
-        cursor_position.X == target_frame_buffer->width;
-        cursor_position.Y -= 16;
-        if (cursor_position.Y < 0) cursor_position.Y = 0;
     }
 }
 
