@@ -16,10 +16,11 @@ __attribute__((interrupt)) void general_protection_fault_handler(struct interrup
 }
 
 __attribute__((interrupt)) void keyboard_interrupt_handler(struct interrupt_frame *frame) {
-    GlobalRenderer->print("Pressed");
     // PS2 keyboard is port 0x60
     // Get the scan code
     uint8_t scan_code = inb(0x60);
+    // Handle the key press
+    handle_keyboard(scan_code);
     // End the interrupt
     pic_end_master();
 }

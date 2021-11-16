@@ -7,7 +7,13 @@ BasicRenderer::BasicRenderer(Framebuffer* target_frame_buffer, PSF1_FONT* psf1_f
     this->target_frame_buffer = target_frame_buffer;
     this->font = psf1_font;
     color = 0xffffffff;
+    clear_color = 0x00000000;
     cursor_position = {0, 0};
+}
+
+// Clear the screen with the set color
+void BasicRenderer::clear() {
+    clear(this->clear_color);
 }
 
 // Clear the screen
@@ -29,6 +35,39 @@ void BasicRenderer::clear(uint32_t color) {
     }
 }
 
+// Clear the previous cursor position with default clear color
+void BasicRenderer::clear_char() {
+    clear_char(this->clear_color);
+}
+
+// Clear the previous cursor position and move there
+void BasicRenderer::clear_char(uint32_t color) {
+    // Move cursor back
+    if (cursor_position.X == 0) {
+        cursor_position.X == target_frame_buffer->width;
+        cursor_position.Y -= 16;
+        if (cursor_position.Y < 0) cursor_position.Y = 0;
+    }
+    // Completely clear that cell
+    unsigned int x_off = cursor_position.X;
+    unsigned int y_off = cursor_position.Y;
+    unsigned int* pixel_ptr = (unsigned int*)target_frame_buffer->base_address;
+    // Write the character info to the pixel_ptr
+    for (unsigned long y = y_off; y < y_off + 16; y++) {
+        for (unsigned long x = x_off - 8; x < x_off; x++) {
+            *(unsigned int*)(pixel_ptr + x + (y * target_frame_buffer->pixels_per_scanline)) = color;
+        }
+    }
+    cursor_position.X -= 8;
+    // Handle underflow
+    if (cursor_position.X < 0) {
+        cursor_position.X == target_frame_buffer->width;
+        cursor_position.Y -= 16;
+        if (cursor_position.Y < 0) cursor_position.Y = 0;
+    }
+}
+
+// Go to the next line
 void BasicRenderer::next() {
     cursor_position.X = 0;
     cursor_position.Y += 16;
@@ -71,5 +110,15 @@ void BasicRenderer::put_char(char chr, unsigned int x_off, unsigned int y_off) {
 
         }
         font_ptr++;
+    }
+}
+
+// Write the char at the cursor
+void BasicRenderer::put_char(char chr) {
+    put_char(chr, cursor_position.X, cursor_position.Y);
+    // Increment cursor position
+    cursor_position.X += 8;
+    if(cursor_position.X + 8 > target_frame_buffer->width) {
+            next();
     }
 }
