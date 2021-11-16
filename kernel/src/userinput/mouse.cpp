@@ -1,5 +1,84 @@
 #include "mouse.h"
 
+// Which byte from the mouse packet are we at(out of 3 or 4 usually)
+// 4th byte would be for scroll wheel and mouse 4 and 5
+uint8_t mouse_cycle = 0;
+// The full mouse packet
+uint8_t mouse_packet[4];
+bool mouse_packet_ready = false;
+
+// Mouse position
+Point MousePosition;
+
+// Handle the mouse data bytes
+// https://wiki.osdev.org/PS/2_Mouse
+void handle_ps2_mouse(uint8_t data) {
+    switch (mouse_cycle) {
+        // First byte contains info on mouse buttons and 
+        // details about the x and y values in the 2nd and 3rd bytes (sign, overflow etc)
+        case 0:
+            // If we have a good packet already, dont corrupt it and continue
+            if (mouse_packet_ready) break;
+            // 4th bit must always be 1, otherwise we are out of sync
+            if (data & 0b00001000 == 0) break;
+            mouse_packet[0] = data;
+            mouse_cycle++;
+            break;
+        // Contains the x movement
+        case 1:
+            if (mouse_packet_ready) break;
+            mouse_packet[1] = data;
+            mouse_cycle++;
+            break;
+        // Y movement
+        case 2:
+            if (mouse_packet_ready) break;
+            mouse_packet[2] = data;
+            mouse_packet_ready = true;
+            mouse_cycle = 0;
+            break;
+    }
+}
+
+// Process the current mouse packet if it is ready
+void process_mouse_packet() {
+    // Mouse packet must be ready
+    if (!mouse_packet_ready) return;
+    mouse_packet_ready = false;
+    // Fetch conditions from the data
+    bool x_negative, y_negative, x_overflow, y_overflow;
+    x_negative = (mouse_packet[0] & PS2_X_SIGN_MASK);
+    y_negative = (mouse_packet[0] & PS2_Y_SIGN_MASK);
+    x_overflow = (mouse_packet[0] & PS2_X_OVERFLOW_MASK);
+    y_overflow = (mouse_packet[0] & PS2_Y_OVERFLOW_MASK);
+    // Handle data
+    // Update x position
+    if (!x_negative) {
+        MousePosition.X += mouse_packet[1];
+        if (x_overflow) MousePosition.X += 255;
+    } else {
+        mouse_packet[1] = 256 - mouse_packet[1];
+        MousePosition.X -= mouse_packet[1];
+        if (x_overflow) MousePosition.X -= 255;
+    }
+    // Update y position
+    if (!y_negative) {
+        MousePosition.Y -= mouse_packet[2];
+        if (y_overflow) MousePosition.Y -= 255;
+    } else {
+        mouse_packet[2] = 256 - mouse_packet[2];
+        MousePosition.Y += mouse_packet[2];
+        if (y_overflow) MousePosition.Y += 255;
+    }
+    // Bound mouse position
+    if (MousePosition.X < 0) MousePosition.X = 0;
+    if (MousePosition.X > GlobalRenderer->target_frame_buffer->width - 8) MousePosition.X = GlobalRenderer->target_frame_buffer->width - 8;
+    if (MousePosition.Y < 0) MousePosition.Y = 0;
+    if (MousePosition.Y > GlobalRenderer->target_frame_buffer->height - 16) MousePosition.Y = GlobalRenderer->target_frame_buffer->height - 16;
+
+    GlobalRenderer->put_char('a', MousePosition.X, MousePosition.Y);
+}
+
 // We must wait during communication with the mouse port
 // https://wiki.osdev.org/Mouse_Input#Waiting_to_Send_Bytes_to_Port_0x60_and_0x64
 void mouse_wait() {

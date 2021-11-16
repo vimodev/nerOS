@@ -27,6 +27,8 @@ __attribute__((interrupt)) void keyboard_interrupt_handler(interrupt_frame *fram
 
 __attribute__((interrupt)) void mouse_interrupt_handler(interrupt_frame *frame) {
     uint8_t mouse_data = inb(0x60);
+    // Use the byte to form complete mouse packets
+    handle_ps2_mouse(mouse_data);
     // Interrupt passes through slave and cascades through master
     pic_end_slave();
 }

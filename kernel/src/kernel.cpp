@@ -16,5 +16,9 @@ extern "C" void _start(BootInfo* boot_info){
     GlobalRenderer->print(to_string(GlobalAllocator.get_reserved_ram() / 1000));
     GlobalRenderer->print("\n");
 
+    while (true) {
+        process_mouse_packet();
+    }
+
     while(true);
 }
