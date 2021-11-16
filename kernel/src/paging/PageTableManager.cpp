@@ -2,7 +2,7 @@
 #include "PageMapIndexer.h"
 #include <stdint.h>
 #include "PageFrameAllocator.h"
-#include "../memory.h"
+#include "../memory/memory.h"
 
 PageTableManager::PageTableManager(PageTable* pml4_address) {
     this->PML4 = pml4_address;

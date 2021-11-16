@@ -40,7 +40,7 @@ void PageFrameAllocator::read_efi_memory_map(EFI_MEMORY_DESCRIPTOR* memory_map, 
     init_bitmap(bitmap_size, largest_free_segment);
 
     // Lock the pages where the bitmap itself is stored
-    lock_pages(&page_bitmap, page_bitmap.size / 4096 + 1);
+    lock_pages(page_bitmap.buffer, page_bitmap.size / 4096 + 1);
 
     // For any unusable unconventional memory, also reserve those pages
     for (int i = 0; i < memory_map_entries; i++){
