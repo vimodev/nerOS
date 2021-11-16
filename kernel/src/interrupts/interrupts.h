@@ -18,10 +18,11 @@
 
 struct interrupt_frame;
 
-__attribute__((interrupt)) void page_fault_handler(struct interrupt_frame *frame);
-__attribute__((interrupt)) void double_fault_handler(struct interrupt_frame *frame);
-__attribute__((interrupt)) void general_protection_fault_handler(struct interrupt_frame *frame);
-__attribute__((interrupt)) void keyboard_interrupt_handler(struct interrupt_frame *frame);
+__attribute__((interrupt)) void page_fault_handler(interrupt_frame *frame);
+__attribute__((interrupt)) void double_fault_handler(interrupt_frame *frame);
+__attribute__((interrupt)) void general_protection_fault_handler(interrupt_frame *frame);
+__attribute__((interrupt)) void keyboard_interrupt_handler(interrupt_frame *frame);
+__attribute__((interrupt)) void mouse_interrupt_handler(interrupt_frame *frame);
 
 void remap_pic();
 void pic_end_master();

@@ -1,21 +1,21 @@
 #include "interrupts.h"
 
-__attribute__((interrupt)) void page_fault_handler(struct interrupt_frame *frame) {
+__attribute__((interrupt)) void page_fault_handler(interrupt_frame *frame) {
     panic("Page fault detected.");
     while (true);
 }
 
-__attribute__((interrupt)) void double_fault_handler(struct interrupt_frame *frame) {
+__attribute__((interrupt)) void double_fault_handler(interrupt_frame *frame) {
     panic("Double fault detected.");
     while (true);
 }
 
-__attribute__((interrupt)) void general_protection_fault_handler(struct interrupt_frame *frame) {
+__attribute__((interrupt)) void general_protection_fault_handler(interrupt_frame *frame) {
     panic("General protection fault detected.");
     while (true);
 }
 
-__attribute__((interrupt)) void keyboard_interrupt_handler(struct interrupt_frame *frame) {
+__attribute__((interrupt)) void keyboard_interrupt_handler(interrupt_frame *frame) {
     // PS2 keyboard is port 0x60
     // Get the scan code
     uint8_t scan_code = inb(0x60);
@@ -23,6 +23,12 @@ __attribute__((interrupt)) void keyboard_interrupt_handler(struct interrupt_fram
     handle_keyboard(scan_code);
     // End the interrupt
     pic_end_master();
+}
+
+__attribute__((interrupt)) void mouse_interrupt_handler(interrupt_frame *frame) {
+    uint8_t mouse_data = inb(0x60);
+    // Interrupt passes through slave and cascades through master
+    pic_end_slave();
 }
 
 // Tell the master PIC chip to end the interrupt

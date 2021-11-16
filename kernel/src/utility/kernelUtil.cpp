@@ -69,16 +69,13 @@ void prepare_interrupts() {
     // Keyboard interrupt
     // PIC was remapped to 0x20 and keyboard was the second interrupt hence 0x21
     set_idt_gate((void *) keyboard_interrupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
+    // Mouse interrupt
+    set_idt_gate((void *) mouse_interrupt_handler, 0x2c, IDT_TA_InterruptGate, 0x08);
 
     asm ("lidt %0" : : "m" (idtr));
 
     // Remap the PIC interrupts
     remap_pic();
-    // Unmask the keyboard interrupt from master PIC
-    outb(PIC1_DATA, 0b11111101);
-    outb(PIC2_DATA, 0b11111111);
-    // Enable the maskable interrupts
-    asm ("sti");
 }
 
 // Everything we need to do to get the kernel basic functionality
@@ -102,6 +99,18 @@ KernelInfo initialize_kernel(BootInfo* boot_info){
 
     // Prepare the interrupt handlers
     prepare_interrupts();
+
+    // Prepare the mouse
+    init_ps2_mouse();
+
+    // Unmask interrupts from master PIC
+    // First zero bit allows interrupts from PIC2 slave to go through PIC1 master (cascade)
+    // Second zero bit unmasks the keyboard interrupts, allowing us to handle them
+    outb(PIC1_DATA, 0b11111001);
+    // Zero bit unmasks the mouse interrupts, allowing us to handle them
+    outb(PIC2_DATA, 0b11101111);
+    // Enable the maskable interrupts
+    asm ("sti");
 
     // Return the kernel info
     return kernel_util_kernel_info;

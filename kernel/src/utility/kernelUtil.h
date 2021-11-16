@@ -14,6 +14,7 @@
 #include "../io/io.h"
 #include "../interrupts/IDT.h"
 #include "../interrupts/interrupts.h"
+#include "../userinput/mouse.h"
 
 struct BootInfo {
 	Framebuffer* framebuffer;
