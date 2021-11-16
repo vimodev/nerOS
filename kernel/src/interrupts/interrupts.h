@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../BasicRenderer.h"
+#include "../graphics/BasicRenderer.h"
 #include "../panic.h"
 #include "../io.h"
 #include "../userinput/keyboard.h"

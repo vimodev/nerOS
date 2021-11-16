@@ -1,5 +1,5 @@
 #include "panel.h"
-#include "BasicRenderer.h"
+#include "graphics/BasicRenderer.h"
 
 // Display kernel panic stream
 void panic(const char *panic_message) {
