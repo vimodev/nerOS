@@ -10,6 +10,30 @@ BasicRenderer::BasicRenderer(Framebuffer* target_frame_buffer, PSF1_FONT* psf1_f
     cursor_position = {0, 0};
 }
 
+// Clear the screen
+void BasicRenderer::clear(uint32_t color) {
+    // Base of the frame buffer
+    uint64_t fb_base = (uint64_t) target_frame_buffer->base_address;
+    // Pixels per scanline times 4, since 4 bytes per pixel
+    uint64_t bytes_per_scanline = target_frame_buffer->pixels_per_scanline * 4;
+    uint64_t fb_height = target_frame_buffer->height;
+    uint64_t fb_size = target_frame_buffer->buffer_size;
+    // Go over all scanlines
+    for (int vertical_scan_line = 0; vertical_scan_line < fb_height; vertical_scan_line++) {
+        // Calculate the base ptr to that scanline
+        uint64_t pixel_ptr_base = fb_base + (bytes_per_scanline * vertical_scan_line);
+        // Set all the pixels to color
+        for (uint32_t *pixel_ptr = (uint32_t *) pixel_ptr_base; pixel_ptr < (uint32_t *) (pixel_ptr_base + bytes_per_scanline); pixel_ptr++) {
+            *pixel_ptr = color;
+        }
+    }
+}
+
+void BasicRenderer::next() {
+    cursor_position.X = 0;
+    cursor_position.Y += 16;
+}
+
 // print a piece of text to terminal
 void BasicRenderer::print(const char* str) {
     // While chr is not string terminator
@@ -17,8 +41,7 @@ void BasicRenderer::print(const char* str) {
     while(*chr != 0){
         // Handle newlines
         if (*chr == '\n') {
-            cursor_position.X = 0;
-            cursor_position.Y += 16;
+            next();
             chr++;
             continue;
         }
@@ -26,10 +49,8 @@ void BasicRenderer::print(const char* str) {
         put_char(*chr, cursor_position.X, cursor_position.Y);
         // And move cursor
         cursor_position.X+=8;
-        if(cursor_position.X + 8 > target_frame_buffer->width)
-        {
-            cursor_position.X = 0;
-            cursor_position.Y += 16;
+        if(cursor_position.X + 8 > target_frame_buffer->width) {
+            next();
         }
         chr++;
     }
