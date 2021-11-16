@@ -1,7 +1,11 @@
 #include "kernelUtil.h"
+#include "interrupts/IDT.h"
+#include "interrupts/interrupts.h"
 
+BasicRenderer renderer = BasicRenderer(NULL, NULL);
 KernelInfo kernel_util_kernel_info;
 PageTableManager kernel_util_page_table_manager = NULL;
+IDTR idtr;
 
 // Prepare the memory map
 void prepare_memory(BootInfo* boot_info){
@@ -44,8 +48,26 @@ void prepare_memory(BootInfo* boot_info){
     kernel_util_kernel_info.page_table_manager = &kernel_util_page_table_manager;
 }
 
+// Prepare the system's interrupts
+void prepare_interrupts() {
+    // Create the IDTR
+    idtr.limit = 0x0fff;
+    idtr.offset = (uint64_t) GlobalAllocator.request_page();
+
+    // Page fault handler
+    IDTDescriptorEntry *interrupt_page_fault = (IDTDescriptorEntry *)(idtr.offset + 0xe * sizeof(IDTDescriptorEntry));
+    interrupt_page_fault->set_offset((uint64_t) page_fault_handler);
+    interrupt_page_fault->type_attr = IDT_TA_InterruptGate;
+    interrupt_page_fault->selector = 0x08;
+    asm ("lidt %0" : : "m" (idtr));
+}
+
 // Everything we need to do to get the kernel basic functionality
 KernelInfo initialize_kernel(BootInfo* boot_info){
+
+    // Create GlobalRenderer
+    renderer = BasicRenderer(boot_info->framebuffer, boot_info->psf1_font);
+    GlobalRenderer = &renderer;
 
     // Load the GDT
     GDTDescriptor gdt_descriptor;
@@ -58,6 +80,9 @@ KernelInfo initialize_kernel(BootInfo* boot_info){
 
     // Set the entire draw buffer to black
     memset(boot_info->framebuffer->base_address, 0, boot_info->framebuffer->buffer_size);
+
+    // Prepare the interrupt handlers
+    prepare_interrupts();
 
     // Return the kernel info
     return kernel_util_kernel_info;

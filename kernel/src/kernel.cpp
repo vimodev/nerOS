@@ -4,25 +4,17 @@ extern "C" void _start(BootInfo* boot_info){
 
     KernelInfo kernel_info = initialize_kernel(boot_info);
     PageTableManager* page_table_manager = kernel_info.page_table_manager;
-    BasicRenderer renderer = BasicRenderer(boot_info->framebuffer, boot_info->psf1_font); 
 
-    renderer.print("Kernel Initialized Successfully\n");
-    renderer.print("KB free: ");
-    renderer.print(to_string(GlobalAllocator.get_free_ram() / 1000));
-    renderer.print("\n");
-    renderer.print("KB used: ");
-    renderer.print(to_string(GlobalAllocator.get_used_ram() / 1000));
-    renderer.print("\n");
-    renderer.print("KB reserved: ");
-    renderer.print(to_string(GlobalAllocator.get_reserved_ram() / 1000));
-    renderer.print("\n");
-
-    page_table_manager->map_memory((void*)0x600000000, (void*)0x80000);
-
-    uint64_t* test = (uint64_t*)0x600000000;
-    *test = 26;
-
-    renderer.print(to_string(*test));
+    GlobalRenderer->print("Kernel Initialized Successfully\n");
+    GlobalRenderer->print("KB free: ");
+    GlobalRenderer->print(to_string(GlobalAllocator.get_free_ram() / 1000));
+    GlobalRenderer->print("\n");
+    GlobalRenderer->print("KB used: ");
+    GlobalRenderer->print(to_string(GlobalAllocator.get_used_ram() / 1000));
+    GlobalRenderer->print("\n");
+    GlobalRenderer->print("KB reserved: ");
+    GlobalRenderer->print(to_string(GlobalAllocator.get_reserved_ram() / 1000));
+    GlobalRenderer->print("\n");
 
     while(true);
 }

@@ -1,5 +1,7 @@
 #include "BasicRenderer.h"
 
+BasicRenderer *GlobalRenderer;
+
 // Create a renderer with a frame buffer and font
 BasicRenderer::BasicRenderer(Framebuffer* target_frame_buffer, PSF1_FONT* psf1_font) {
     this->target_frame_buffer = target_frame_buffer;

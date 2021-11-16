@@ -29,6 +29,11 @@ qemu: kernel buildimg run
 
 kernel: $(OBJS) link
 
+$(OBJDIR)/interrupts/interrupts.o: $(SRCDIR)/interrupts/interrupts.cpp
+	@ echo !==== COMPILING $^
+	@ mkdir -p $(@D)
+	$(CC) -mno-red-zone -mgeneral-regs-only -ffreestanding -c $^ -o $@
+
 $(OBJDIR)/%.o: $(SRCDIR)/%.cpp
 	@ echo !==== COMPILING $^
 	@ mkdir -p $(@D)
