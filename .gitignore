@@ -1,0 +1,6 @@
+gnu-efi/apps
+gnu-efi/gnuefi
+gnu-efi/inc
+gnu-efi/lib
+kernel/lib
+kernel/bin/CustomOS.img
