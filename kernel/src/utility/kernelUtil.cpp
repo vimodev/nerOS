@@ -105,6 +105,9 @@ KernelInfo initialize_kernel(BootInfo* boot_info){
     // Set the entire draw buffer to black
     GlobalRenderer->clear(0x0);
 
+    // Initialize the heap at a very large address
+    initialize_heap((void *) 0x0000100000000000, 0x10);
+
     // Prepare the interrupt handlers
     prepare_interrupts();
 

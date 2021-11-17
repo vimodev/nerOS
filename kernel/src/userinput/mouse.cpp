@@ -51,7 +51,7 @@ void handle_ps2_mouse(uint8_t data) {
             // If we have a good packet already, dont corrupt it and continue
             if (mouse_packet_ready) break;
             // 4th bit must always be 1, otherwise we are out of sync
-            if (data & 0b00001000 == 0) break;
+            if ((data & 0b00001000) == 0) break;
             mouse_packet[0] = data;
             mouse_cycle++;
             break;

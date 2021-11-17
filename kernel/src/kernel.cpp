@@ -16,5 +16,12 @@ extern "C" void _start(BootInfo* boot_info){
 
     print_memory_summary();
 
+    GlobalRenderer->println(to_hstring((uint64_t) malloc(0x8000)));
+    void *address = malloc(0x8000);
+    GlobalRenderer->println(to_hstring((uint64_t) address));
+    GlobalRenderer->println(to_hstring((uint64_t) malloc(0x8000)));
+    free(address);
+    GlobalRenderer->println(to_hstring((uint64_t) malloc(0x8000)));
+
     while(true);
 }
