@@ -16,7 +16,7 @@ void prepare_memory(BootInfo* boot_info){
 
     // Calculate how many pages the kernel needs
     uint64_t kernel_size = (uint64_t)&_KernelEnd - (uint64_t)&_KernelStart;
-    uint64_t kernel_pages = (uint64_t)kernel_size / 4096 + 1;
+    uint64_t kernel_pages = (uint64_t)kernel_size / 0x1000 + 1;
 
     // Lock that many pages starting from kernel start
     GlobalAllocator.lock_pages(&_KernelStart, kernel_pages);
@@ -35,7 +35,7 @@ void prepare_memory(BootInfo* boot_info){
     uint64_t fb_base = (uint64_t)boot_info->framebuffer->base_address;
     uint64_t fb_size = (uint64_t)boot_info->framebuffer->buffer_size + 0x1000;
     GlobalAllocator.lock_pages((void*)fb_base, fb_size/ 0x1000 + 1);
-    for (uint64_t t = fb_base; t < fb_base + fb_size; t += 4096){
+    for (uint64_t t = fb_base; t < fb_base + fb_size; t += 0x1000){
         GlobalPageTableManager.map_memory((void*)t, (void*)t);
     }
 

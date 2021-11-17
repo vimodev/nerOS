@@ -13,15 +13,15 @@ uint8_t MousePointer[] = {
     0b11111111, 0b10000000, 
     0b11111110, 0b00000000, 
     0b11111100, 0b00000000, 
-    0b11111000, 0b00000000, 
-    0b11110000, 0b00000000, 
-    0b11100000, 0b00000000, 
-    0b11000000, 0b00000000, 
-    0b11000000, 0b00000000, 
-    0b10000000, 0b00000000, 
-    0b10000000, 0b00000000, 
-    0b00000000, 0b00000000, 
-    0b00000000, 0b00000000, 
+    0b11111100, 0b00000000, 
+    0b11111110, 0b00000000, 
+    0b11100111, 0b00000000, 
+    0b11000011, 0b10000000, 
+    0b11000001, 0b11000000, 
+    0b10000000, 0b11100000, 
+    0b10000000, 0b01110000, 
+    0b00000000, 0b00111000, 
+    0b00000000, 0b00010000, 
     0b00000000, 0b00000000, 
     0b00000000, 0b00000000, 
     0b00000000, 0b00000000, 
@@ -34,6 +34,16 @@ Point old_mouse_position;
 // Handle the mouse data bytes
 // https://wiki.osdev.org/PS/2_Mouse
 void handle_ps2_mouse(uint8_t data) {
+
+    // Process packet if it would be complete
+    process_mouse_packet();
+    // The first mouse packet we get on power is whack, so we skip it
+    static bool skip = true;
+    if (skip) { 
+        skip = false;
+        return;
+    }
+
     switch (mouse_cycle) {
         // First byte contains info on mouse buttons and 
         // details about the x and y values in the 2nd and 3rd bytes (sign, overflow etc)

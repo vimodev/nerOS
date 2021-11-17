@@ -16,9 +16,5 @@ extern "C" void _start(BootInfo* boot_info){
 
     print_memory_summary();
 
-    while (true) {
-        process_mouse_packet();
-    }
-
     while(true);
 }

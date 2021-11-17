@@ -10,7 +10,7 @@ uint64_t get_memory_size(EFI_MEMORY_DESCRIPTOR* memory_map, uint64_t memory_map_
     // Otherwise loop over all memory map entries, count their pages and multiply by 0x1000
     for (int i = 0; i < memory_map_entries; i++){
         EFI_MEMORY_DESCRIPTOR* desc = (EFI_MEMORY_DESCRIPTOR*)((uint64_t)memory_map + (i * memory_map_descriptor_size));
-        memory_size += desc->numPages * 4096;
+        memory_size += desc->numPages * 0x1000;
     }
 
     return memory_size;
