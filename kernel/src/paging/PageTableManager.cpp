@@ -4,6 +4,9 @@
 #include "PageFrameAllocator.h"
 #include "../memory/memory.h"
 
+// Global page table manager
+PageTableManager GlobalPageTableManager = NULL;
+
 PageTableManager::PageTableManager(PageTable* pml4_address) {
     this->PML4 = pml4_address;
 }

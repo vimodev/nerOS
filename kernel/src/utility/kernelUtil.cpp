@@ -2,7 +2,6 @@
 
 BasicRenderer renderer = BasicRenderer(NULL, NULL);
 KernelInfo kernel_util_kernel_info;
-PageTableManager kernel_util_page_table_manager = NULL;
 IDTR idtr;
 
 // Prepare the memory map
@@ -25,11 +24,11 @@ void prepare_memory(BootInfo* boot_info){
     // Initialize the PML4 memory table and manager
     PageTable* PML4 = (PageTable*)GlobalAllocator.request_page();
     memset(PML4, 0, 0x1000);
-    kernel_util_page_table_manager = PageTableManager(PML4);
+    GlobalPageTableManager = PageTableManager(PML4);
 
     // Map all memory from virtual = physical
     for (uint64_t t = 0; t < get_memory_size(boot_info->memory_map, memory_map_entries, boot_info->memory_map_descriptor_size); t+= 0x1000){
-        kernel_util_page_table_manager.map_memory((void*)t, (void*)t);
+        GlobalPageTableManager.map_memory((void*)t, (void*)t);
     }
 
     // Also map the framebuffer
@@ -37,13 +36,13 @@ void prepare_memory(BootInfo* boot_info){
     uint64_t fb_size = (uint64_t)boot_info->framebuffer->buffer_size + 0x1000;
     GlobalAllocator.lock_pages((void*)fb_base, fb_size/ 0x1000 + 1);
     for (uint64_t t = fb_base; t < fb_base + fb_size; t += 4096){
-        kernel_util_page_table_manager.map_memory((void*)t, (void*)t);
+        GlobalPageTableManager.map_memory((void*)t, (void*)t);
     }
 
     // Tell the cpu to use the Memory map we created
     asm ("mov %0, %%cr3" : : "r" (PML4));
 
-    kernel_util_kernel_info.page_table_manager = &kernel_util_page_table_manager;
+    kernel_util_kernel_info.page_table_manager = &GlobalPageTableManager;
 }
 
 // Set an IDT gate (binding interrupt handlers in the IDTR)
@@ -78,6 +77,15 @@ void prepare_interrupts() {
     remap_pic();
 }
 
+// Prepare the ACPI interface for usage
+void prepare_acpi(BootInfo *boot_info) {
+    ACPI::SDTHeader *xsdt = (ACPI::SDTHeader *) (boot_info->rsdp->xsdt_address);
+    // Find the MCFG table
+    ACPI::MCFGHeader *mcfg = (ACPI::MCFGHeader *) ACPI::find_table(xsdt, (char *) "MCFG");
+    // Enumerate over all pci devices
+    PCI::enumerate_pci(mcfg);
+}
+
 // Everything we need to do to get the kernel basic functionality
 KernelInfo initialize_kernel(BootInfo* boot_info){
 
@@ -102,6 +110,9 @@ KernelInfo initialize_kernel(BootInfo* boot_info){
 
     // Prepare the mouse
     init_ps2_mouse();
+
+    // Prepare ACPI interface
+    prepare_acpi(boot_info);
 
     // Unmask interrupts from master PIC
     // First zero bit allows interrupts from PIC2 slave to go through PIC1 master (cascade)

@@ -135,6 +135,14 @@ int memcmp(const void* aptr, const void* bptr, size_t n){
 	return 0;
 }
 
+// String compare implementation
+UINTN strcmp(CHAR8 *a, CHAR8 *b, UINTN length) {
+	for (UINTN i = 0; i < length; i++) {
+		if (*a != *b) return 0;
+	}
+	return 1;
+}
+
 // Struct to pass boot information to kernel conveniently
 typedef struct {
 	Framebuffer* framebuffer;
@@ -142,6 +150,7 @@ typedef struct {
 	EFI_MEMORY_DESCRIPTOR* memory_map;
 	UINTN memory_map_size;
 	UINTN memory_map_descriptor_size;
+	void *rsdp; // Root system description pointer
 } BootInfo;
 
 // EFI main entry function
@@ -256,6 +265,23 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 
 	}
 
+	// Get the RSDP (Root System Descriptor Pointer)
+	// For ACPI 2.0 - Power management interface and such
+	EFI_CONFIGURATION_TABLE *config_table = SystemTable->ConfigurationTable;
+	void *rsdp = NULL;
+	EFI_GUID acpi2_table_guid = ACPI_20_TABLE_GUID;
+	// Find the ACPI2.0 table
+	for (UINTN index = 0; index < SystemTable->NumberOfTableEntries; index++) {
+		// Check for GUID match
+		if (CompareGuid(&config_table[index].VendorGuid, &acpi2_table_guid)) {
+			// Make sure that it is the RSDP
+			if (strcmp((CHAR8 *) "RSD PTR ", (CHAR8 *) config_table->VendorTable, 8)) {
+				rsdp = (void *) config_table->VendorTable;
+			}
+		}
+		config_table++;
+	}
+
 	// Locate kernel entry function in the kernel data
 	void (*kernel_start)(BootInfo*) = ((__attribute__((sysv_abi)) void (*)(BootInfo*) ) header.e_entry);
 
@@ -266,6 +292,7 @@ EFI_STATUS efi_main(EFI_HANDLE ImageHandle, EFI_SYSTEM_TABLE *SystemTable) {
 	boot_info.memory_map = map;
 	boot_info.memory_map_size = map_size;
 	boot_info.memory_map_descriptor_size = descriptor_size;
+	boot_info.rsdp = rsdp;
 
 	// Exit boot services
 	system_table->BootServices->ExitBootServices(image_handle, map_key);

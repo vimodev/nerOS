@@ -17,6 +17,7 @@ class BasicRenderer {
         void put_pixel(uint32_t x, uint32_t y, uint32_t color);
         uint32_t get_pixel(uint32_t x, uint32_t y);
         void print(const char* str);
+        void println(const char* str = "");
         void put_char(char chr, unsigned int x_off, unsigned int y_off);
         void put_char(char chr, unsigned int x_off, unsigned int y_off, uint32_t color);
         void put_char(char chr);

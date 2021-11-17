@@ -128,6 +128,12 @@ void BasicRenderer::next() {
     cursor_position.Y += 16;
 }
 
+// Print a string and move to a new line
+void BasicRenderer::println(const char *str) {
+    print(str);
+    next();
+}
+
 // print a piece of text to terminal
 void BasicRenderer::print(const char* str) {
     // While chr is not string terminator
