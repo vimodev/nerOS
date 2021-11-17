@@ -102,11 +102,11 @@ void process_mouse_packet() {
 
     // Handle button presses
     if (mouse_packet[0] & PS2_LEFT_BTN_MASK) {
-        GlobalRenderer->put_char('x', MousePosition.X, MousePosition.Y);
+        
     }
 
     if (mouse_packet[0] & PS2_RIGHT_BTN_MASK) {
-        GlobalRenderer->put_char('x', MousePosition.X, MousePosition.Y, 0x0000ff00);
+        
     }
 
     if (mouse_packet[0] & PS2_MIDDLE_BTN_MASK) {

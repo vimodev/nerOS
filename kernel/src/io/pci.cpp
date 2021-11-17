@@ -17,9 +17,15 @@ namespace PCI {
         if (pci_device_header->device_id == 0) return;
         if (pci_device_header->device_id == 0xFFFF) return;
 
-        GlobalRenderer->print(to_hstring(pci_device_header->vendor_id));
-        GlobalRenderer->print(" ");
-        GlobalRenderer->println(to_hstring(pci_device_header->device_id));
+        GlobalRenderer->print(get_vendor_name(pci_device_header->vendor_id));
+        GlobalRenderer->print(" / ");
+        GlobalRenderer->print(get_device_name(pci_device_header->vendor_id, pci_device_header->device_id));
+        GlobalRenderer->print(" / ");
+        GlobalRenderer->print(DeviceClasses[pci_device_header->device_class]);
+        GlobalRenderer->print(" / ");
+        GlobalRenderer->print(get_subclass_name(pci_device_header->device_class, pci_device_header->device_subclass));
+        GlobalRenderer->print(" / ");
+        GlobalRenderer->println(get_program_interface_name(pci_device_header->device_class, pci_device_header->device_subclass, pci_device_header->program_interface));
     }
 
     // Enumerate over all function over all devices
