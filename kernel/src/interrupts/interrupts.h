@@ -5,6 +5,7 @@
 #include "../io/io.h"
 #include "../userinput/keyboard.h"
 #include "../userinput/mouse.h"
+#include "../scheduling/pit/pit.h"
 
 #define PIC1_COMMAND 0x20
 #define PIC1_DATA 0x21
@@ -24,6 +25,7 @@ __attribute__((interrupt)) void double_fault_handler(interrupt_frame *frame);
 __attribute__((interrupt)) void general_protection_fault_handler(interrupt_frame *frame);
 __attribute__((interrupt)) void keyboard_interrupt_handler(interrupt_frame *frame);
 __attribute__((interrupt)) void mouse_interrupt_handler(interrupt_frame *frame);
+__attribute__((interrupt)) void pit_interrupt_handler(interrupt_frame *frame);
 
 void remap_pic();
 void pic_end_master();

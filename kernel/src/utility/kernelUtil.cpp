@@ -70,6 +70,8 @@ void prepare_interrupts() {
     set_idt_gate((void *) keyboard_interrupt_handler, 0x21, IDT_TA_InterruptGate, 0x08);
     // Mouse interrupt
     set_idt_gate((void *) mouse_interrupt_handler, 0x2c, IDT_TA_InterruptGate, 0x08);
+    // PIT interrupt (Programmable Interval Timer)
+    set_idt_gate((void *) pit_interrupt_handler, 0x20, IDT_TA_InterruptGate, 0x08);
 
     asm ("lidt %0" : : "m" (idtr));
 
@@ -120,7 +122,8 @@ KernelInfo initialize_kernel(BootInfo* boot_info){
     // Unmask interrupts from master PIC
     // First zero bit allows interrupts from PIC2 slave to go through PIC1 master (cascade)
     // Second zero bit unmasks the keyboard interrupts, allowing us to handle them
-    outb(PIC1_DATA, 0b11111001);
+    // Last zero bit unmasks the PIT chip (programmable interval timer) used for real-time stuff
+    outb(PIC1_DATA, 0b11111000);
     // Zero bit unmasks the mouse interrupts, allowing us to handle them
     outb(PIC2_DATA, 0b11101111);
     // Enable the maskable interrupts

@@ -33,6 +33,13 @@ __attribute__((interrupt)) void mouse_interrupt_handler(interrupt_frame *frame) 
     pic_end_slave();
 }
 
+__attribute__((interrupt)) void pit_interrupt_handler(interrupt_frame *frame) {
+    // Tick the clock
+    PIT::tick();
+    // End the interrupt
+    pic_end_master();
+}
+
 // Tell the master PIC chip to end the interrupt
 void pic_end_master() {
     outb(PIC1_COMMAND, PIC_EOI);
