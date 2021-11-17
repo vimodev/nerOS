@@ -1,10 +1,6 @@
 #include "utility/kernelUtil.h"
 
-extern "C" void _start(BootInfo* boot_info){
-
-    KernelInfo kernel_info = initialize_kernel(boot_info);
-    PageTableManager* page_table_manager = kernel_info.page_table_manager;
-
+void print_memory_summary() {
     GlobalRenderer->print("Kernel Initialized Successfully\n");
     GlobalRenderer->print("KB free: ");
     GlobalRenderer->print(to_string(GlobalAllocator.get_free_ram() / 1000));
@@ -15,6 +11,14 @@ extern "C" void _start(BootInfo* boot_info){
     GlobalRenderer->print("KB reserved: ");
     GlobalRenderer->print(to_string(GlobalAllocator.get_reserved_ram() / 1000));
     GlobalRenderer->print("\n");
+}
+
+extern "C" void _start(BootInfo* boot_info){
+
+    KernelInfo kernel_info = initialize_kernel(boot_info);
+    PageTableManager* page_table_manager = kernel_info.page_table_manager;
+
+    print_memory_summary();
 
     while (true) {
         process_mouse_packet();

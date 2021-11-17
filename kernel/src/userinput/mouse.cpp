@@ -7,8 +7,29 @@ uint8_t mouse_cycle = 0;
 uint8_t mouse_packet[4];
 bool mouse_packet_ready = false;
 
+// Pixel map for the mouse pointer image (16x16)
+uint8_t MousePointer[] = {
+    0b11111111, 0b11100000, 
+    0b11111111, 0b10000000, 
+    0b11111110, 0b00000000, 
+    0b11111100, 0b00000000, 
+    0b11111000, 0b00000000, 
+    0b11110000, 0b00000000, 
+    0b11100000, 0b00000000, 
+    0b11000000, 0b00000000, 
+    0b11000000, 0b00000000, 
+    0b10000000, 0b00000000, 
+    0b10000000, 0b00000000, 
+    0b00000000, 0b00000000, 
+    0b00000000, 0b00000000, 
+    0b00000000, 0b00000000, 
+    0b00000000, 0b00000000, 
+    0b00000000, 0b00000000, 
+};
+
 // Mouse position
 Point MousePosition;
+Point old_mouse_position;
 
 // Handle the mouse data bytes
 // https://wiki.osdev.org/PS/2_Mouse
@@ -44,7 +65,6 @@ void handle_ps2_mouse(uint8_t data) {
 void process_mouse_packet() {
     // Mouse packet must be ready
     if (!mouse_packet_ready) return;
-    mouse_packet_ready = false;
     // Fetch conditions from the data
     bool x_negative, y_negative, x_overflow, y_overflow;
     x_negative = (mouse_packet[0] & PS2_X_SIGN_MASK);
@@ -72,11 +92,29 @@ void process_mouse_packet() {
     }
     // Bound mouse position
     if (MousePosition.X < 0) MousePosition.X = 0;
-    if (MousePosition.X > GlobalRenderer->target_frame_buffer->width - 8) MousePosition.X = GlobalRenderer->target_frame_buffer->width - 8;
+    if (MousePosition.X > GlobalRenderer->target_frame_buffer->width - 1) MousePosition.X = GlobalRenderer->target_frame_buffer->width - 1;
     if (MousePosition.Y < 0) MousePosition.Y = 0;
-    if (MousePosition.Y > GlobalRenderer->target_frame_buffer->height - 16) MousePosition.Y = GlobalRenderer->target_frame_buffer->height - 16;
+    if (MousePosition.Y > GlobalRenderer->target_frame_buffer->height - 1) MousePosition.Y = GlobalRenderer->target_frame_buffer->height - 1;
 
-    GlobalRenderer->put_char('a', MousePosition.X, MousePosition.Y);
+    // Draw the mouse cursor
+    GlobalRenderer->clear_mouse_cursor(MousePointer, old_mouse_position);
+    GlobalRenderer->draw_overlay_mouse_cursor(MousePointer, MousePosition, 0xffffffff);
+
+    // Handle button presses
+    if (mouse_packet[0] & PS2_LEFT_BTN_MASK) {
+        GlobalRenderer->put_char('x', MousePosition.X, MousePosition.Y);
+    }
+
+    if (mouse_packet[0] & PS2_RIGHT_BTN_MASK) {
+        GlobalRenderer->put_char('x', MousePosition.X, MousePosition.Y, 0x0000ff00);
+    }
+
+    if (mouse_packet[0] & PS2_MIDDLE_BTN_MASK) {
+        
+    }
+
+    old_mouse_position = MousePosition;
+    mouse_packet_ready = false;
 }
 
 // We must wait during communication with the mouse port
