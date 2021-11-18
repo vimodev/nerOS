@@ -2,6 +2,11 @@
 
 // Get the i'th bit using the [] operator
 bool Bitmap::operator[](uint64_t index){
+    return get(index);
+}
+
+// Get the value at the given index
+bool Bitmap::get(uint64_t index){
     // Out of bounds
     if (index > size * 8) return false;
     // Split byte and bit index

@@ -17,10 +17,7 @@ extern "C" void _start(BootInfo* boot_info){
 
     print_memory_summary();
 
-    for (int t = 0; t < 200; t++) {
-        GlobalRenderer->put_char('g');
-        PIT::sleep(100);
+    while(true) {
+        asm ("hlt");
     }
-
-    while(true);
 }

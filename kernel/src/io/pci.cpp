@@ -1,5 +1,7 @@
 #include "pci.h"
 
+#include "../ahci/ahci.h"
+
 // https://wiki.osdev.org/PCI
 // Each bus has 32 devices and each device has 8 functions
 // We enumerate recursively over all of each
@@ -26,6 +28,17 @@ namespace PCI {
         GlobalRenderer->print(get_subclass_name(pci_device_header->device_class, pci_device_header->device_subclass));
         GlobalRenderer->print(" / ");
         GlobalRenderer->println(get_program_interface_name(pci_device_header->device_class, pci_device_header->device_subclass, pci_device_header->program_interface));
+
+        switch (pci_device_header->device_class) {
+            case 0x01: // Mass storage controller
+                switch (pci_device_header->device_subclass) {
+                    case 0x06: // SATA
+                        switch (pci_device_header->program_interface) {
+                            case 0x01: // AHCI 1.0 device
+                                new AHCI::AHCIDriver(pci_device_header);
+                        }
+                }
+        }
     }
 
     // Enumerate over all function over all devices

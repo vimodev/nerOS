@@ -6,6 +6,7 @@
 #include "../paging/PageTableManager.h"
 #include "../graphics/BasicRenderer.h"
 #include "../utility/cstr.h"
+#include "../memory/heap.h"
 
 namespace PCI {
 

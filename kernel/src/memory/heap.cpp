@@ -132,6 +132,7 @@ void HeapSegmentHeader::combine_forward() {
     if (next->next != NULL) {
         next->next->last = this;
     }
+    next = next->next;
     // Update the length of this segment to combine both lengths
     // And we now only use 1 header whereas we previously used 2
     length = length + next->length + sizeof(HeapSegmentHeader);

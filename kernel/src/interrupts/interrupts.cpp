@@ -1,5 +1,7 @@
 #include "interrupts.h"
 
+#include "../graphics/BasicRenderer.h"
+
 __attribute__((interrupt)) void page_fault_handler(interrupt_frame *frame) {
     panic("Page fault detected.");
     while (true);
