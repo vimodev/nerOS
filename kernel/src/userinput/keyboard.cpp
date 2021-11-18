@@ -1,5 +1,8 @@
 #include "keyboard.h"
 
+#include "kbScancodeTranslation.h"
+#include "../graphics/BasicRenderer.h"
+
 // Status of functional pressed keys
 bool is_left_shift_pressed = false;
 bool is_right_shift_pressed = false;

@@ -1,5 +1,9 @@
 #include "utility/kernelUtil.h"
+
 #include "scheduling/pit/pit.h"
+#include "graphics/BasicRenderer.h"
+#include "paging/PageFrameAllocator.h"
+#include "utility/cstr.h"
 
 void print_memory_summary() {
     GlobalRenderer->println("Kernel Initialized Successfully");

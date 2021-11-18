@@ -1,5 +1,8 @@
 #include "heap.h"
 
+#include "../paging/PageTableManager.h"
+#include "../paging/PageFrameAllocator.h"
+
 void *heap_start;
 void *heap_end;
 HeapSegmentHeader *last_header;

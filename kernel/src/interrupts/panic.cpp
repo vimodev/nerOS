@@ -1,5 +1,7 @@
 #include "panic.h"
 
+#include "../graphics/BasicRenderer.h"
+
 // Display kernel panic stream
 void panic(const char *panic_message) {
     GlobalRenderer->clear(0x00ff0000);

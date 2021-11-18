@@ -1,6 +1,11 @@
 #include "interrupts.h"
 
 #include "../graphics/BasicRenderer.h"
+#include "../interrupts/panic.h"
+#include "../io/io.h"
+#include "../userinput/keyboard.h"
+#include "../userinput/mouse.h"
+#include "../scheduling/pit/pit.h"
 
 __attribute__((interrupt)) void page_fault_handler(interrupt_frame *frame) {
     panic("Page fault detected.");

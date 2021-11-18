@@ -1,5 +1,20 @@
 #include "kernelUtil.h"
 
+#include "../graphics/BasicRenderer.h"
+#include "cstr.h"
+#include "../memory/memory.h"
+#include "../memory/heap.h"
+#include "Bitmap.h"
+#include "../paging/PageFrameAllocator.h"
+#include "../paging/PageMapIndexer.h"
+#include "../paging/paging.h"
+#include "../gdt/gdt.h"
+#include "../io/io.h"
+#include "../interrupts/IDT.h"
+#include "../interrupts/interrupts.h"
+#include "../userinput/mouse.h"
+#include "../io/pci.h"
+
 BasicRenderer renderer = BasicRenderer(NULL, NULL);
 KernelInfo kernel_util_kernel_info;
 IDTR idtr;

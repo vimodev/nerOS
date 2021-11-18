@@ -1,7 +1,6 @@
 #pragma once
 
 #include <stdint.h>
-#include "../../io/io.h"
 
 // programmable interval timer
 namespace PIT {

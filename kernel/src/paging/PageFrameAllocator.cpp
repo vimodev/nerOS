@@ -1,5 +1,7 @@
 #include "PageFrameAllocator.h"
 
+#include "../memory/memory.h"
+
 // Variables are kept up to date to track system memory status
 uint64_t free_memory;
 uint64_t reserved_memory;

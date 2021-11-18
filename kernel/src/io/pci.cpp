@@ -1,6 +1,10 @@
 #include "pci.h"
 
 #include "../ahci/ahci.h"
+#include "../paging/PageTableManager.h"
+#include "../graphics/BasicRenderer.h"
+#include "../utility/cstr.h"
+#include "../memory/heap.h"
 
 // https://wiki.osdev.org/PCI
 // Each bus has 32 devices and each device has 8 functions

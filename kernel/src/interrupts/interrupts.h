@@ -1,11 +1,5 @@
 #pragma once
 
-#include "../interrupts/panic.h"
-#include "../io/io.h"
-#include "../userinput/keyboard.h"
-#include "../userinput/mouse.h"
-#include "../scheduling/pit/pit.h"
-
 #define PIC1_COMMAND 0x20
 #define PIC1_DATA 0x21
 #define PIC2_COMMAND 0xa0

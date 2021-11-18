@@ -3,9 +3,6 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#include "../paging/PageTableManager.h"
-#include "../paging/PageFrameAllocator.h"
-
 struct HeapSegmentHeader {
     size_t length;
     HeapSegmentHeader *next;

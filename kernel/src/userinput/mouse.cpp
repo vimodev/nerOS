@@ -1,5 +1,8 @@
 #include "mouse.h"
 
+#include "../io/io.h"
+#include "../graphics/BasicRenderer.h"
+
 // Which byte from the mouse packet are we at(out of 3 or 4 usually)
 // 4th byte would be for scroll wheel and mouse 4 and 5
 uint8_t mouse_cycle = 0;

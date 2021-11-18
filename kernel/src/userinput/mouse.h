@@ -1,8 +1,8 @@
 #pragma once
 
-#include "../io/io.h"
+#include <stdint.h>
+
 #include "../utility/math.h"
-#include "../graphics/BasicRenderer.h"
 
 #define PS2_LEFT_BTN_MASK       0b00000001
 #define PS2_RIGHT_BTN_MASK      0b00000010
